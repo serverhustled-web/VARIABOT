@@ -101,14 +101,14 @@ jobs:
         echo "📱 Testing Android framework in live environment..."
         python -c "
         import sys
-        from android_rooting.core.root_detection import RootDetectionEngine
+        from android_rooting.core.root_detection import AndroidRootDetector
         from android_rooting.core.privilege_escalation import PrivilegeEscalationEngine
         from android_rooting.utils.logging_system import AndroidRootLogger
         
         # Test framework initialization
         try:
-            root_engine = RootDetectionEngine()
-            print(f'✅ Root detection engine: {len(root_engine.detection_methods)} methods')
+            root_detector = AndroidRootDetector()
+            print(f'✅ Root detection engine: {len(root_detector.detection_methods)} methods')
             
             escalation_engine = PrivilegeEscalationEngine()  
             print(f'✅ Privilege escalation engine: {len(escalation_engine.escalation_methods)} methods')
@@ -172,7 +172,7 @@ jobs:
         
         try:
             # Test all major components together
-            from android_rooting.core.root_detection import RootDetectionEngine
+            from android_rooting.core.root_detection import AndroidRootDetector
             from android_rooting.utils.logging_system import AndroidRootLogger
             from android_rooting.bots.error_bot import ErrorVariableAdaptorBot
             import streamlit as st
@@ -183,11 +183,11 @@ jobs:
             # Test integrated workflow
             with tempfile.TemporaryDirectory() as temp_dir:
                 logger = AndroidRootLogger('integration_test', log_dir=temp_dir)
-                root_engine = RootDetectionEngine()
+                root_detector = AndroidRootDetector()
                 error_bot = ErrorVariableAdaptorBot()
                 
                 logger.info('Integration test: Components initialized')
-                logger.info(f'Root methods: {len(root_engine.detection_methods)}')
+                logger.info(f'Root methods: {len(root_detector.detection_methods)}')
                 
                 print('✅ Integrated workflow test passed')
                 print('✅ Live integration trial completed successfully')
@@ -214,8 +214,8 @@ jobs:
             
             # Performance test: rapid imports
             for i in range(5):
-                from android_rooting.core.root_detection import RootDetectionEngine
-                engine = RootDetectionEngine()
+                from android_rooting.core.root_detection import AndroidRootDetector
+                detector = AndroidRootDetector()
                 del engine
             
             end_time = time.time()

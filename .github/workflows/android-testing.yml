@@ -38,7 +38,7 @@ jobs:
     - name: Test Android System Detection
       run: |
         echo "🔍 Testing Android system detection capabilities..."
-        python -c "from android_rooting.core.root_detection import RootDetectionEngine; engine = RootDetectionEngine(); print('✅ Root detection engine initialized')"
+        python -c "from android_rooting.core.root_detection import AndroidRootDetector; detector = AndroidRootDetector(); print('✅ Root detection system initialized')"
         
     - name: Test Termux Compatibility
       run: |

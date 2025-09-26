@@ -82,10 +82,10 @@ jobs:
         sys.path.insert(0, '.')
         
         try:
-            from android_rooting.core.root_detection import RootDetectionEngine
+            from android_rooting.core.root_detection import AndroidRootDetector
             
             # Initialize root detection engine
-            engine = RootDetectionEngine()
+            detector = AndroidRootDetector()
             print(f'✅ Root detection engine initialized with {len(engine.detection_methods)} methods')
             
             # Test root detection methods in Ubuntu environment
