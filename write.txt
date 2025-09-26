@@ -1,0 +1,38 @@
+The provided text is a comprehensive guide to Android Applications Pentesting, primarily referencing HackTricks. It covers various aspects of analyzing Android applications for security vulnerabilities.
+
+Here's a summary of the key topics:
+
+*   **Resources & Tools:** Links to kernel exploits, Kali Linux base images, HackTricks wiki for Linux hardening, and tools like ADB (Android Debug Bridge) for device interaction.
+*   **Application Analysis Basics:**
+    *   **Smali:** Modifying application code by decompiling, editing Smali, and recompiling APKs.
+    *   **APK Handling:** Downloading APKs from various sources, extracting them from devices, and merging split APKs.
+    *   **Static Analysis:** Decompiling Java code, searching for sensitive strings (passwords, URLs, API keys, etc.), examining `Manifest.xml` (for debuggable apps, backup settings, network security, exported components, content providers, broadcast receivers, URL schemes, SDK versions), and `strings.xml` for leaked secrets.
+    *   **Automated Static Code Analysis:** Mention of `mariana-trench` for finding vulnerabilities by scanning code for sources, sinks, and rules.
+*   **Common Vulnerabilities:**
+    *   **Tapjacking:** Malicious app overlaying a victim app to trick users into interacting with it.
+    *   **Task Hijacking:** An activity with `singleTask` launchMode and no `taskAffinity` allowing a malicious app to hijack the real application's task.
+    *   **Insecure Data Storage:**
+        *   **Internal Storage:** Misuse of `MODE_WORLD_READABLE` and `MODE_WORLD_WRITABLE`.
+        *   **External Storage:** Storing sensitive data on globally readable/writable external storage, and the need for input validation and cryptographic verification for executables.
+        *   **Clear-text Data:** Sensitive information in `shared_prefs` XML files or SQLite databases.
+    *   **Broken TLS:** Accepting all certificates, even with hostname mismatches.
+    *   **Broken Cryptography:** Poor key management (hardcoded/predictable keys), use of insecure/deprecated algorithms (RC4, MD4, MD5, SHA1), and lack of brute-force resistant hashing with salt for passwords.
+*   **Other Security Checks:**
+    *   APK obfuscation to hinder reverse engineering.
+    *   Root detection for sensitive apps.
+    *   Emulator detection for sensitive apps.
+    *   Application integrity checks.
+    *   Using `APKiD` to identify compilers/packers/obfuscators.
+    *   Bypassing biometric authentication.
+    *   Identifying dangerous functions like `Runtime.exec()`, `ProcessBuilder()`, `system()`, `sendTextMessage`, `sendMultipartTestMessage`, and native functions.
+*   **Dynamic Analysis:**
+    *   **Environment Setup:** Recommended use of a rooted device (emulated or physical) with tools like Burp CA, Drozer, and Frida.
+    *   **Online Dynamic Analysis:** Using platforms like `appetize.io` to upload, execute, and monitor APKs, including ADB access.
+    *   **Local Dynamic Analysis:** Using emulators (Android Studio AVD, Genymotion, Nox) or physical devices (activating developer options, rooting).
+    *   **Magisk/Zygisk Notes:** Patching `boot.img`, enabling Zygisk/DenyList for root hiding, and using `scrcpy`.
+*   **Unintended Data Leakage:**
+    *   **Logging:** Exposing debugging information publicly, monitoring with `pidcat` and `adb logcat`, and avoiding logging sensitive data.
+    *   **Copy/Paste Buffer Caching:** Risk of other applications accessing clipboard data; disabling copy/paste for sensitive sections.
+    *   **Crash Logs:** Logs assisting attackers; avoiding logging on crashes or transmitting securely.
+    *   **Analytics Data:** Sensitive data leakage to third-party services; intercepting traffic to check.
+    *   **SQLite DBs:** Inspecting internal SQLite databases for sensitive information.

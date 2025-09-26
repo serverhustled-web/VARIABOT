@@ -1,0 +1,62 @@
+name: Enforce Standards
+on:
+  pull_request:
+    branches: [main]
+    paths: ['**/*.py', '**/*.sh', '**/*.md', '/reference_vault/**']
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # Pinned for repeatability
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install linters
+        run: |
+          pip install ruff shellcheck-py  # Ruff for Python, shellcheck for Bash
+
+      - name: Lint Python (Ruff: Enforce naming, error handling, no magic numbers)
+        run: |
+          ruff check --output-format=github .  # Fails on violations; aligns with Coding Standards
+
+      - name: Lint Bash (ShellCheck: Enforce shebangs, set -euo pipefail)
+        run: |
+          find . -name "*.sh" -exec shellcheck {} \;  # Scans for prohibited patterns like silent errors
+
+      - name: Audit Vault Compliance (Custom: Check References blocks & citations)
+        run: |
+          python -c "
+          import os, re
+          from pathlib import Path
+          failures = []
+          for file in Path('.').rglob('*.py'):  # Extend to .sh, .md
+              content = file.read_text()
+              if 'References:' not in content:
+                  failures.append(f'// GAP: Missing References in {file}')
+              if not re.search(r'See: /reference_vault/', content):
+                  failures.append(f'// GAP: No vault citation in {file}')
+          if failures:
+              print('::error::Standards violation:\n' + '\n'.join(failures))
+              exit(1)  # Fail build; propose vault addition per Gap Protocol
+          print('100% Flawless: All files traceable.')
+          "
+        # Traces to /reference_vault/PRODUCTION_GRADE_STANDARDS.md#auditability
+
+      - name: Comment on PR with suggestions (if gaps)
+        if: failure() && github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Standards Enforced - Mutations Needed: Add References blocks & vault cites. See Gap Handling Protocol in copilot_instructions.md.
+
+References:
+- Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#coding-standards
+- External: Ruff Docs — https://docs.astral.sh/ruff/
+

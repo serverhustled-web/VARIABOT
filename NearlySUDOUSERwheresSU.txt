@@ -1,0 +1,12 @@
+Based on the provided Termux transcript and the question "wheresSU":
+
+1.  **`su` command location**: Your `printenv` output shows that your `PATH` environment variable includes several common locations for the `su` (superuser) binary:
+    *   `/sbin/su`
+    *   `/su/bin`
+    *   `/su/xbin`
+
+    This means that if the `su` binary exists in any of these directories and is executable, you should be able to run it by simply typing `su` in your terminal.
+
+2.  **Local root-related files**: In your home directory (`/data/data/com.termux/files/home`), you have files named `suroot` and `xsu`. These are not standard `su` binaries but could be custom scripts or tools related to gaining or managing root access within your Termux environment.
+
+If you type `su` and it doesn't work (e.g., "command not found" or "permission denied"), it suggests that the `su` binary might not be present or properly configured in the locations specified in your `PATH`, or you lack the necessary permissions to execute it. This aligns with a "half-rooted" state where full `su` access might still need to be established or confirmed.
