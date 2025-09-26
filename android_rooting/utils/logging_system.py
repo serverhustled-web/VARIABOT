@@ -22,6 +22,7 @@ import threading
 import time
 import hashlib
 import gzip
+import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable

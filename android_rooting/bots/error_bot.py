@@ -7,8 +7,6 @@ Real-time error monitoring, adaptation, and obstacle overcoming for Android root
 Implements endless adaptation capability with GitHub integration for audit trails.
 """
 
-import asyncio
-import json
 import logging
 import time
 import traceback
