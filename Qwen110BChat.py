@@ -1,6 +1,5 @@
 # SPACE
 # https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo
-import time
 import sys
 from gradio_client import Client
 
@@ -49,5 +48,5 @@ while True:
             try:
                 print(chunk[1][0][1].replace(final, ""), end="", flush=True)
                 final = chunk[1][0][1]
-            except:
+            except (IndexError, TypeError, AttributeError):
                 pass

@@ -16,6 +16,7 @@ Compatible with: Python 3.7+, Bash, Kali Linux, Android 10+
 import os
 import sys
 import json
+import shlex
 import time
 import threading
 import logging
@@ -352,9 +353,10 @@ class ErrorHandlerBot:
         methods = ["magisk", "supersu", "custom_exploit"]
         for method in methods:
             try:
+                # Use safer subprocess call without shell=True
+                python_code = "from android_rooting.core.magisk_manager import MagiskManager; m=MagiskManager(); print(m.repair_partial_root())"
                 result = subprocess.run(
-                    f'python3 -c "from android_rooting.core.magisk_manager import MagiskManager; m=MagiskManager(); print(m.repair_partial_root())"',
-                    shell=True,
+                    ["python3", "-c", python_code],
                     capture_output=True,
                     text=True,
                     timeout=30,

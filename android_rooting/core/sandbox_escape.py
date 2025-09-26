@@ -236,7 +236,7 @@ class SandboxEscapeEngine:
             logger.info("Attempting advanced Termux PRoot escape...")
 
             # Create comprehensive escape script
-            escape_script = """#!/bin/bash
+            escape_script = r"""#!/bin/bash
 # Advanced Termux PRoot Escape Techniques
 
 set -e
@@ -433,7 +433,7 @@ echo "[*] PRoot escape attempt completed"
             logger.info("Attempting Android service exploitation...")
 
             # Service exploitation script
-            exploit_script = """#!/bin/bash
+            exploit_script = r"""#!/bin/bash
 # Android System Service Exploitation
 
 echo "[*] Starting Android service exploitation..."
@@ -569,7 +569,7 @@ echo "[*] Service exploitation completed"
             logger.info("Attempting filesystem breakout...")
 
             # Filesystem breakout script
-            breakout_script = """#!/bin/bash
+            breakout_script = r"""#!/bin/bash
 # Advanced Filesystem Breakout Techniques
 
 echo "[*] Starting filesystem breakout..."

