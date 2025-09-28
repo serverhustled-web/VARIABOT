@@ -49,5 +49,14 @@ while True:
             try:
                 print(chunk[1][0][1].replace(final, ""), end="", flush=True)
                 final = chunk[1][0][1]
-            except:
-                pass
+            except (AttributeError, IndexError, TypeError) as e:
+                print(f"Warning: Error processing chunk: {e}")
+            except Exception as e:
+                print(f"Unexpected error in chunk processing: {e}")
+
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#error-handling
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Gradio Client Documentation — https://gradio.app/docs/
+# - External: HuggingFace Hub — https://huggingface.co/docs/huggingface_hub/
