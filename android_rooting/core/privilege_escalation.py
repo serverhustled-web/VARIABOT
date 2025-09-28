@@ -91,7 +91,7 @@ class PrivilegeEscalationEngine:
                 ).strip()
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("privilege_escalation.py"))
+                print(f"Error in privilege_escalation.py: {e}")
                 info["selinux_status"] = "Unknown"
 
         except Exception as e:
@@ -147,7 +147,7 @@ class PrivilegeEscalationEngine:
             env_info["escape_vectors"].append("namespace_escape")
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("privilege_escalation.py"))
+            print(f"Error in privilege_escalation.py: {e}")
             env_info["restrictions"].append("no_unshare")
 
     def _check_root_status(self) -> Dict[str, Any]:
@@ -196,7 +196,7 @@ class PrivilegeEscalationEngine:
                 status["partial_root"] = True
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("privilege_escalation.py"))
+            print(f"Error in privilege_escalation.py: {e}")
             pass
 
         return status
@@ -336,7 +336,7 @@ proot -0 -r / -b /dev -b /proc -b /sys -b /data \\\$
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("privilege_escalation.py"))
+                    print(f"Error in privilege_escalation.py: {e}")
                     pass
 
     def _create_apache_backdoor(self) -> Tuple[bool, str]:
@@ -750,7 +750,7 @@ unshare -U /bin/bash -c "
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("privilege_escalation.py"))
+                    print(f"Error in privilege_escalation.py: {e}")
                     pass
 
     def _vm_boot_escalation(self) -> Tuple[bool, str]:

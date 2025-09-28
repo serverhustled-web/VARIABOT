@@ -263,7 +263,7 @@ class AndroidSystemInfo:
                 root_indicators["selinux_permissive"] = True
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("android_utils.py"))
+            print(f"Error in android_utils.py: {e}")
             pass
         
         # Check write access to system
@@ -275,7 +275,7 @@ class AndroidSystemInfo:
             root_indicators["write_access"] = True
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("android_utils.py"))
+            print(f"Error in android_utils.py: {e}")
             pass
         
         return root_indicators
@@ -287,7 +287,7 @@ class AndroidSystemInfo:
             return current_version >= min_version
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("android_utils.py"))
+            print(f"Error in android_utils.py: {e}")
             return False
     
     def is_termux_environment(self) -> bool:

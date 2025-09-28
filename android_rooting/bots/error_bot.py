@@ -451,7 +451,7 @@ class ErrorAdaptationBot:
                 executed.append(cmd)
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("error_bot.py"))
+                print(f"Error in error_bot.py: {e}")
                 pass
         
         return {

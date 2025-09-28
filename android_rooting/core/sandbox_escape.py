@@ -98,7 +98,7 @@ class SandboxEscapeEngine:
                         )
                     except Exception as e:
 
-                        print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                        print(f"Error in sandbox_escape.py: {e}")
                         continue
 
             # Network information
@@ -107,7 +107,7 @@ class SandboxEscapeEngine:
                     info["network_tcp"] = f.read()
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                print(f"Error in sandbox_escape.py: {e}")
                 pass
 
         except Exception as e:
@@ -427,7 +427,7 @@ echo "[*] PRoot escape attempt completed"
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                    print(f"Error in sandbox_escape.py: {e}")
                     pass
 
     def _service_exploitation(self) -> Tuple[bool, str]:
@@ -565,7 +565,7 @@ echo "[*] Service exploitation completed"
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                    print(f"Error in sandbox_escape.py: {e}")
                     pass
 
     def _filesystem_breakout(self) -> Tuple[bool, str]:
@@ -718,7 +718,7 @@ echo "[*] Filesystem breakout completed"
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                    print(f"Error in sandbox_escape.py: {e}")
                     pass
 
     def _process_injection(self) -> Tuple[bool, str]:
@@ -864,7 +864,7 @@ echo "[*] Process injection completed"
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                    print(f"Error in sandbox_escape.py: {e}")
                     pass
 
     def _native_exploit_chain(self) -> Tuple[bool, str]:
@@ -1073,7 +1073,7 @@ echo "[*] Native exploit chain completed"
                     os.unlink(script_path)
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                    print(f"Error in sandbox_escape.py: {e}")
                     pass
 
     def execute_sandbox_escape(self) -> Dict[str, Any]:
@@ -1128,7 +1128,7 @@ echo "[*] Native exploit chain completed"
                             results["root_access"] = True
                     except Exception as e:
 
-                        print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
+                        print(f"Error in sandbox_escape.py: {e}")
                         pass
 
                     # Add recommendations

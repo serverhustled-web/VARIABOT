@@ -150,7 +150,7 @@ class PlatformDetector:
                             return int(line.split('=')[1].strip())
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("variabot_integration.py"))
+            print(f"Error in variabot_integration.py: {e}")
             pass
         
         # Try via Termux API
@@ -161,7 +161,7 @@ class PlatformDetector:
                 return info.get('android_version')
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("variabot_integration.py"))
+            print(f"Error in variabot_integration.py: {e}")
             pass
         
         return None
@@ -198,7 +198,7 @@ class PlatformDetector:
                 capabilities.battery_powered = battery_info is not None
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("variabot_integration.py"))
+                print(f"Error in variabot_integration.py: {e}")
                 capabilities.battery_powered = capabilities.platform in [
                     PlatformType.ANDROID_TERMUX, 
                     PlatformType.ANDROID_NATIVE
@@ -277,7 +277,7 @@ class AndroidOptimizer:
             self.android_context = PythonActivity.mActivity
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("variabot_integration.py"))
+            print(f"Error in variabot_integration.py: {e}")
             logger.warning("Could not setup Android context")
     
     def optimize_for_mobile(self) -> Dict[str, Any]:
@@ -407,7 +407,7 @@ class ModelIntegrationManager:
             return process.memory_info().rss / (1024 * 1024)
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("variabot_integration.py"))
+            print(f"Error in variabot_integration.py: {e}")
             return 0.0
     
     def _trigger_garbage_collection(self):

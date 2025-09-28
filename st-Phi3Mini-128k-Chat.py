@@ -17,7 +17,10 @@ if "messages" not in st.session_state:
 
 @st.cache_resource
 def create_client():
-    yourHFtoken = "hf_xxxxxxxxxxxxxxxxxx"  # here your HF token
+    yourHFtoken = os.environ.get("HF_TOKEN", "")
+    if not yourHFtoken:
+        st.error("HF_TOKEN environment variable not set. Please set it with your HuggingFace token.")
+        st.stop()
     print(f"loading the API gradio client for {st.session_state.hf_model}")
     client = Client("eswardivi/Phi-3-mini-128k-instruct", hf_token=yourHFtoken)
     return client

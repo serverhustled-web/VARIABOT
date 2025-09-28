@@ -109,7 +109,7 @@ def create_client():
                 return client
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("patch_integration.py"))
+                print(f"Error in patch_integration.py: {e}")
                 continue
         
         st.error("❌ All models failed to load. Please check your connection and try again.")
@@ -148,7 +148,7 @@ def writehistory(text):
                         f.write(f'[{datetime.now().isoformat()}] {text}\\n')
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("patch_integration.py"))
+                print(f"Error in patch_integration.py: {e}")
                 pass  # Fail silently for logging
                 
     except Exception as e:

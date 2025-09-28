@@ -80,9 +80,7 @@ class TermuxEnvironment:
             if result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
         except Exception as e:
-
-            print(f"Error in {}: {{e}}".format("termux_environment.py"))
-            pass
+            print(f"Error getting Android version: {e}")
         
         # Fallback: analyze runtime paths
         runtime_root = self.env_vars.get('ANDROID_RUNTIME_ROOT', '')
@@ -100,7 +98,7 @@ class TermuxEnvironment:
                 return int(sdk_part)
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("termux_environment.py"))
+                print(f"Error in termux_environment.py: {e}")
                 pass
         return 28  # Default from the provided environment
     

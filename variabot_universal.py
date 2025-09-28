@@ -136,7 +136,7 @@ class VariabotUniversalInterface:
                 android_version = result.stdout.strip()
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("variabot_universal.py"))
+            print(f"Error in variabot_universal.py: {e}")
             pass
         
         return android_version

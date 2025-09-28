@@ -440,7 +440,7 @@ class KaliAdaptBot:
                 opportunities.append("ADB_SHELL_AVAILABLE")
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
+            print(f"Error in kali_adapt_bot.py: {e}")
             pass
             
         # Check for temporary root conditions
@@ -450,7 +450,7 @@ class KaliAdaptBot:
                 opportunities.append("TEMPORARY_ROOT_ACTIVE")
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
+            print(f"Error in kali_adapt_bot.py: {e}")
             pass
             
         # Check for writable system access
@@ -463,7 +463,7 @@ class KaliAdaptBot:
                 os.remove(test_path)
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
+            print(f"Error in kali_adapt_bot.py: {e}")
             pass
             
         if opportunities:
@@ -518,7 +518,7 @@ class KaliAdaptBot:
                             return True
                     except Exception as e:
 
-                        print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
+                        print(f"Error in kali_adapt_bot.py: {e}")
                         pass
                         
             except Exception as e:

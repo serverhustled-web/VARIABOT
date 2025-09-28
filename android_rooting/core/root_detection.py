@@ -183,7 +183,7 @@ class AndroidRootDetector:
                         return True
                 except Exception as e:
 
-                    print(f"Error in {}: {{e}}".format("root_detection.py"))
+                    print(f"Error in root_detection.py: {e}")
                     pass
                 return True
         
@@ -212,7 +212,7 @@ class AndroidRootDetector:
                     return True
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("root_detection.py"))
+                print(f"Error in root_detection.py: {e}")
                 pass
         
         return False
@@ -265,7 +265,7 @@ class AndroidRootDetector:
         except Exception as e:
 
                     
-            print(f"Error in {}: {{e}}".format("root_detection.py"))
+            print(f"Error in root_detection.py: {e}")
             pass
         
         return False
@@ -284,7 +284,7 @@ class AndroidRootDetector:
                 return True
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("root_detection.py"))
+            print(f"Error in root_detection.py: {e}")
             pass
         
         return False
@@ -312,7 +312,7 @@ class AndroidRootDetector:
                             return True
             except Exception as e:
 
-                print(f"Error in {}: {{e}}".format("root_detection.py"))
+                print(f"Error in root_detection.py: {e}")
                 pass
         
         return False
@@ -335,7 +335,7 @@ class AndroidRootDetector:
         except Exception as e:
 
                 
-            print(f"Error in {}: {{e}}".format("root_detection.py"))
+            print(f"Error in root_detection.py: {e}")
             pass
         
         return False
@@ -361,7 +361,7 @@ class AndroidRootDetector:
                             return True
         except Exception as e:
 
-            print(f"Error in {}: {{e}}".format("root_detection.py"))
+            print(f"Error in root_detection.py: {e}")
             pass
         
         return False

@@ -87,7 +87,7 @@ if myprompt := st.chat_input("What is an AI model?"):
             #        message_placeholder.markdown(r[1][0][1].replace(full_response,'')+ "▌")
             #        full_response = r[1][0][1]
             #    except Exception as e:
-        print(f"Error in {}: {{e}}".format("st-Qwen1.5-MoE-A2.7B-Chat.py"))
+        print(f"Error in st-Qwen1.5-MoE-A2.7B-Chat.py: {e}")
             #        pass
 
             # for r in res:
