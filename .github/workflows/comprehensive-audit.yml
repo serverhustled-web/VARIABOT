@@ -1,0 +1,120 @@
+name: Comprehensive Code Audit
+
+on:
+  push:
+    branches: [ "main", "copilot/*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    name: Run Comprehensive Code Audit
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 bandit safety
+        
+    - name: Make audit script executable
+      run: chmod +x comprehensive_code_audit.sh
+      
+    - name: Run comprehensive code audit
+      run: |
+        ./comprehensive_code_audit.sh > audit_report.txt 2>&1 || true
+        
+    - name: Display audit results
+      run: |
+        echo "=== AUDIT RESULTS ==="
+        cat audit_report.txt
+        echo ""
+        echo "=== DETAILED AUDIT LOG ==="
+        if [ -f audit_results.log ]; then
+          cat audit_results.log
+        fi
+        
+    - name: Check audit status
+      run: |
+        if grep -q "AUDIT FAILED" audit_report.txt; then
+          echo "❌ Audit failed with critical violations"
+          exit 1
+        elif grep -q "AUDIT WARNING" audit_report.txt; then
+          echo "⚠️ Audit completed with warnings"
+          exit 0
+        else
+          echo "✅ Audit passed successfully"
+          exit 0
+        fi
+        
+    - name: Upload audit artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: audit-reports
+        path: |
+          audit_report.txt
+          audit_results.log
+        retention-days: 30
+        
+    - name: Comment on PR with audit results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          let auditResults = '';
+          
+          try {
+            auditResults = fs.readFileSync('audit_report.txt', 'utf8');
+          } catch (error) {
+            auditResults = 'Audit report not found';
+          }
+          
+          const body = `## 🔍 Comprehensive Code Audit Results
+          
+          <details>
+          <summary>Click to view audit report</summary>
+          
+          \`\`\`
+          ${auditResults}
+          \`\`\`
+          
+          </details>
+          
+          **Note:** This is an automated audit based on the production-grade standards in the reference vault.
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#testing-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: GitHub Actions Documentation — https://docs.github.com/en/actions

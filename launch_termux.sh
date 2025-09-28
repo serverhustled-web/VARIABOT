@@ -3,7 +3,7 @@
 # Auto-configured for Termux 0.119.0-beta.3 environment
 # Supports Android 10+ with specialized mobile optimizations
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on any error, undefined vars, pipe failures
 
 # Color codes for better terminal output
 RED='\033[0;31m'
@@ -274,3 +274,10 @@ if ! launch_interface "$INTERFACE" "$EXTRA_ARGS"; then
     echo -e "  4. Check logs in $TERMUX_HOME/.variabot/logs/"
     exit 1
 fi
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#deployment-standards
+# - Internal: /reference_vault/linux_kali_android.md#termux-optimization
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Termux Environment — https://termux.dev/docs/
+# - External: Android Performance Guide — https://developer.android.com/topic/performance

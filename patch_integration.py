@@ -107,7 +107,9 @@ def create_client():
                 client = Client(fallback, hf_token=yourHFtoken)
                 st.sidebar.info(f"✅ Using fallback: {fallback}")
                 return client
-            except:
+            except Exception as e:
+
+                print(f"Error in patch_integration.py: {e}")
                 continue
         
         st.error("❌ All models failed to load. Please check your connection and try again.")
@@ -144,7 +146,9 @@ def writehistory(text):
                     os.makedirs(os.path.dirname(android_log), exist_ok=True)
                     with open(android_log, 'a', encoding='utf-8') as f:
                         f.write(f'[{datetime.now().isoformat()}] {text}\\n')
-            except:
+            except Exception as e:
+
+                print(f"Error in patch_integration.py: {e}")
                 pass  # Fail silently for logging
                 
     except Exception as e:
@@ -458,3 +462,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Python Documentation — https://docs.python.org/3/

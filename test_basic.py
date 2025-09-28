@@ -149,3 +149,8 @@ def test_reference_vault_files():
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#testing-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Pytest Documentation — https://docs.pytest.org/

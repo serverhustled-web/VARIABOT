@@ -498,8 +498,10 @@ class ErrorHandlerBot:
                 if recovery_result.returncode == 0:
                     self.logger.info("BOTBRAKE SUCCESS: ADB penetration recovered from failure")
                     return True
-        except:
-            pass
+        except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
+            self.logger.debug(f"ADB recovery attempt failed: {e}")
+        except Exception as e:
+            self.logger.warning(f"Unexpected error in ADB recovery: {e}")
             
         # Check for temporary filesystem access
         try:
@@ -512,8 +514,10 @@ class ErrorHandlerBot:
                 self.logger.info("BOTBRAKE SUCCESS: Filesystem penetration recovered from failure")
                 os.remove(test_file)
                 return True
-        except:
-            pass
+        except (OSError, PermissionError, subprocess.SubprocessError) as e:
+            self.logger.debug(f"Filesystem recovery attempt failed: {e}")
+        except Exception as e:
+            self.logger.warning(f"Unexpected error in filesystem recovery: {e}")
             
         return False
 

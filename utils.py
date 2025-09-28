@@ -157,8 +157,8 @@ class PlatformDetector:
                     for line in f:
                         if "ro.build.version.sdk=" in line:
                             return int(line.split("=")[1].strip())
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to get Android version from build.prop: {e}")
 
         # Try via Termux API
         try:
@@ -166,8 +166,8 @@ class PlatformDetector:
             if result.returncode == 0:
                 info = json.loads(result.stdout)
                 return info.get("android_version")
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to get Android version from termux-info: {e}")
 
         return None
 
@@ -202,7 +202,8 @@ class PlatformDetector:
             try:
                 battery_info = battery.status
                 capabilities.battery_powered = battery_info is not None
-            except:
+            except Exception as e:
+                logger.debug(f"Battery detection failed: {e}")
                 capabilities.battery_powered = capabilities.platform in [
                     PlatformType.ANDROID_TERMUX,
                     PlatformType.ANDROID_NATIVE,
@@ -286,8 +287,8 @@ class AndroidOptimizer:
         try:
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
             self.android_context = PythonActivity.mActivity
-        except:
-            logger.warning("Could not setup Android context")
+        except Exception as e:
+            logger.warning(f"Could not setup Android context: {e}")
 
     def optimize_for_mobile(self) -> Dict[str, Any]:
         """Apply mobile-specific optimizations."""
@@ -424,7 +425,11 @@ class ModelIntegrationManager:
 
             process = psutil.Process()
             return process.memory_info().rss / (1024 * 1024)
-        except:
+        except ImportError:
+            logger.debug("psutil not available for memory monitoring")
+            return 0.0
+        except Exception as e:
+            logger.debug(f"Failed to get memory usage: {e}")
             return 0.0
 
     def _trigger_garbage_collection(self):
@@ -559,3 +564,12 @@ if __name__ == "__main__":
     # Test mobile configuration
     mobile_config = get_mobile_optimized_config()
     print(f"Mobile optimized: {mobile_config['optimized_for_mobile']}")
+
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - Internal: /reference_vault/linux_kali_android.md#environment-detection
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Termux Documentation — https://termux.dev/docs/
+# - External: Python Threading — https://docs.python.org/3/library/threading.html

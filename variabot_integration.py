@@ -148,7 +148,9 @@ class PlatformDetector:
                     for line in f:
                         if 'ro.build.version.sdk=' in line:
                             return int(line.split('=')[1].strip())
-        except:
+        except Exception as e:
+
+            print(f"Error in variabot_integration.py: {e}")
             pass
         
         # Try via Termux API
@@ -157,7 +159,9 @@ class PlatformDetector:
             if result.returncode == 0:
                 info = json.loads(result.stdout)
                 return info.get('android_version')
-        except:
+        except Exception as e:
+
+            print(f"Error in variabot_integration.py: {e}")
             pass
         
         return None
@@ -192,7 +196,9 @@ class PlatformDetector:
             try:
                 battery_info = battery.status
                 capabilities.battery_powered = battery_info is not None
-            except:
+            except Exception as e:
+
+                print(f"Error in variabot_integration.py: {e}")
                 capabilities.battery_powered = capabilities.platform in [
                     PlatformType.ANDROID_TERMUX, 
                     PlatformType.ANDROID_NATIVE
@@ -269,7 +275,9 @@ class AndroidOptimizer:
         try:
             PythonActivity = autoclass('org.kivy.android.PythonActivity')
             self.android_context = PythonActivity.mActivity
-        except:
+        except Exception as e:
+
+            print(f"Error in variabot_integration.py: {e}")
             logger.warning("Could not setup Android context")
     
     def optimize_for_mobile(self) -> Dict[str, Any]:
@@ -397,7 +405,9 @@ class ModelIntegrationManager:
             import psutil
             process = psutil.Process()
             return process.memory_info().rss / (1024 * 1024)
-        except:
+        except Exception as e:
+
+            print(f"Error in variabot_integration.py: {e}")
             return 0.0
     
     def _trigger_garbage_collection(self):
@@ -516,3 +526,8 @@ if __name__ == "__main__":
     # Test mobile configuration
     mobile_config = get_mobile_optimized_config()
     print(f"Mobile optimized: {mobile_config['optimized_for_mobile']}")
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Python Documentation — https://docs.python.org/3/

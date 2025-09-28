@@ -89,7 +89,9 @@ class PrivilegeEscalationEngine:
                 info["selinux_status"] = subprocess.check_output(
                     ["getenforce"], text=True
                 ).strip()
-            except:
+            except Exception as e:
+
+                print(f"Error in privilege_escalation.py: {e}")
                 info["selinux_status"] = "Unknown"
 
         except Exception as e:
@@ -143,7 +145,9 @@ class PrivilegeEscalationEngine:
             subprocess.run(["unshare", "--help"], capture_output=True, check=True)
             env_info["capabilities"].append("unshare")
             env_info["escape_vectors"].append("namespace_escape")
-        except:
+        except Exception as e:
+
+            print(f"Error in privilege_escalation.py: {e}")
             env_info["restrictions"].append("no_unshare")
 
     def _check_root_status(self) -> Dict[str, Any]:
@@ -190,7 +194,9 @@ class PrivilegeEscalationEngine:
                 status["has_root"] = True
             else:
                 status["partial_root"] = True
-        except:
+        except Exception as e:
+
+            print(f"Error in privilege_escalation.py: {e}")
             pass
 
         return status
@@ -328,7 +334,9 @@ proot -0 -r / -b /dev -b /proc -b /sys -b /data \\\$
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in privilege_escalation.py: {e}")
                     pass
 
     def _create_apache_backdoor(self) -> Tuple[bool, str]:
@@ -740,7 +748,9 @@ unshare -U /bin/bash -c "
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in privilege_escalation.py: {e}")
                     pass
 
     def _vm_boot_escalation(self) -> Tuple[bool, str]:
@@ -1010,3 +1020,10 @@ Note: This module is designed for authorized device modification only.
 Users must ensure compliance with applicable laws and device warranties.
 All operations include comprehensive audit trails for security review.
 """
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

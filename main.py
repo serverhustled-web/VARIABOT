@@ -145,8 +145,10 @@ class VariabotUniversalInterface:
             )
             if result.returncode == 0 and result.stdout.strip():
                 android_version = result.stdout.strip()
-        except:
-            pass
+        except (subprocess.SubprocessError, OSError, FileNotFoundError) as e:
+            print(f"Warning: Could not detect Android version: {e}")
+        except Exception as e:
+            print(f"Unexpected error detecting Android version: {e}")
 
         return android_version
 
@@ -556,3 +558,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - Internal: /reference_vault/linux_kali_android.md#platform-detection
+# - External: Flask Documentation — https://flask.palletsprojects.com/
+# - External: Streamlit Documentation — https://docs.streamlit.io/

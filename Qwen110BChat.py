@@ -2,10 +2,16 @@
 # https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo
 import time
 import sys
+import os
 from gradio_client import Client
 
-# Set HF API token  and HF repo
-yourHFtoken = "hf_xxxxxxxxxxxxxxxxxxxx"  # here your HF token
+# Set HF API token and HF repo
+yourHFtoken = os.environ.get("HF_TOKEN", "")  # Get token from environment variable
+if not yourHFtoken:
+    print("Warning: HF_TOKEN environment variable not set. Please set it with your HuggingFace token.")
+    print("Usage: export HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxx")
+    sys.exit(1)
+
 repo = "Qwen/Qwen1.5-110B-Chat-demo"
 
 
@@ -49,5 +55,14 @@ while True:
             try:
                 print(chunk[1][0][1].replace(final, ""), end="", flush=True)
                 final = chunk[1][0][1]
-            except:
-                pass
+            except (AttributeError, IndexError, TypeError) as e:
+                print(f"Warning: Error processing chunk: {e}")
+            except Exception as e:
+                print(f"Unexpected error in chunk processing: {e}")
+
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#error-handling
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Gradio Client Documentation — https://gradio.app/docs/
+# - External: HuggingFace Hub — https://huggingface.co/docs/huggingface_hub/
