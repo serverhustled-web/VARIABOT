@@ -438,7 +438,9 @@ class KaliAdaptBot:
             result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and "device" in result.stdout:
                 opportunities.append("ADB_SHELL_AVAILABLE")
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
             pass
             
         # Check for temporary root conditions
@@ -446,7 +448,9 @@ class KaliAdaptBot:
             result = subprocess.run(["su", "-c", "id"], capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and "uid=0" in result.stdout:
                 opportunities.append("TEMPORARY_ROOT_ACTIVE")
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
             pass
             
         # Check for writable system access
@@ -457,7 +461,9 @@ class KaliAdaptBot:
             if os.path.exists(test_path):
                 opportunities.append("FILESYSTEM_WRITE_ACCESS")
                 os.remove(test_path)
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
             pass
             
         if opportunities:
@@ -510,7 +516,9 @@ class KaliAdaptBot:
                         if result.returncode == 0:
                             self.logger.info(f"BOTBRAKE SUCCESS: Penetration successful with {opportunity}")
                             return True
-                    except:
+                    except Exception as e:
+
+                        print(f"Error in {}: {{e}}".format("kali_adapt_bot.py"))
                         pass
                         
             except Exception as e:

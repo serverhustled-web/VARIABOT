@@ -181,7 +181,9 @@ class AndroidRootDetector:
                     )
                     if result.returncode == 0:
                         return True
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("root_detection.py"))
                     pass
                 return True
         
@@ -208,7 +210,9 @@ class AndroidRootDetector:
                 if package in result.stdout:
                     self.logger.info(f"Superuser app detected: {package}")
                     return True
-            except:
+            except Exception as e:
+
+                print(f"Error in {}: {{e}}".format("root_detection.py"))
                 pass
         
         return False
@@ -258,7 +262,10 @@ class AndroidRootDetector:
                 if os.path.exists(indicator):
                     return True
                     
-        except:
+        except Exception as e:
+
+                    
+            print(f"Error in {}: {{e}}".format("root_detection.py"))
             pass
         
         return False
@@ -275,7 +282,9 @@ class AndroidRootDetector:
             if "permissive" in result.stdout.lower():
                 self.logger.info("SELinux in permissive mode")
                 return True
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("root_detection.py"))
             pass
         
         return False
@@ -301,7 +310,9 @@ class AndroidRootDetector:
                         if indicator in content:
                             self.logger.info(f"Root indicator in {prop_path}: {indicator}")
                             return True
-            except:
+            except Exception as e:
+
+                print(f"Error in {}: {{e}}".format("root_detection.py"))
                 pass
         
         return False
@@ -321,7 +332,10 @@ class AndroidRootDetector:
                 self.logger.info("System partition mounted as writable")
                 return True
                 
-        except:
+        except Exception as e:
+
+                
+            print(f"Error in {}: {{e}}".format("root_detection.py"))
             pass
         
         return False
@@ -345,7 +359,9 @@ class AndroidRootDetector:
                         if cap_value != "0000000000000000":
                             self.logger.info(f"Enhanced capabilities detected: {cap_value}")
                             return True
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("root_detection.py"))
             pass
         
         return False
@@ -374,3 +390,10 @@ class AndroidRootDetector:
 # [2] Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#security-frameworks
 # [3] External: Android Security Documentation - Android root detection methods
 # [4] Standard: OWASP MASVS-RESILIENCE - Mobile application security verification
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

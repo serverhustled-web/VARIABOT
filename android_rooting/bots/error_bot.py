@@ -449,7 +449,9 @@ class ErrorAdaptationBot:
             try:
                 subprocess.run(cmd, shell=True, check=False, timeout=5)
                 executed.append(cmd)
-            except:
+            except Exception as e:
+
+                print(f"Error in {}: {{e}}".format("error_bot.py"))
                 pass
         
         return {
@@ -622,3 +624,10 @@ class ErrorAdaptationBot:
 # [2] Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#adaptive-systems
 # [3] External: Android Security Research - Privilege escalation techniques
 # [4] Standard: OWASP MSTG - Mobile Security Testing Guide
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

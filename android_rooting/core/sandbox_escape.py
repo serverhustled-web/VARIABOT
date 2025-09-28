@@ -96,14 +96,18 @@ class SandboxEscapeEngine:
                         info["processes"].append(
                             {"pid": int(pid_dir), "comm": comm, "cmdline": cmdline}
                         )
-                    except:
+                    except Exception as e:
+
+                        print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                         continue
 
             # Network information
             try:
                 with open("/proc/net/tcp", "r") as f:
                     info["network_tcp"] = f.read()
-            except:
+            except Exception as e:
+
+                print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                 pass
 
         except Exception as e:
@@ -421,7 +425,9 @@ echo "[*] PRoot escape attempt completed"
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                     pass
 
     def _service_exploitation(self) -> Tuple[bool, str]:
@@ -557,7 +563,9 @@ echo "[*] Service exploitation completed"
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                     pass
 
     def _filesystem_breakout(self) -> Tuple[bool, str]:
@@ -708,7 +716,9 @@ echo "[*] Filesystem breakout completed"
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                     pass
 
     def _process_injection(self) -> Tuple[bool, str]:
@@ -852,7 +862,9 @@ echo "[*] Process injection completed"
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                     pass
 
     def _native_exploit_chain(self) -> Tuple[bool, str]:
@@ -1059,7 +1071,9 @@ echo "[*] Native exploit chain completed"
             if "script_path" in locals():
                 try:
                     os.unlink(script_path)
-                except:
+                except Exception as e:
+
+                    print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                     pass
 
     def execute_sandbox_escape(self) -> Dict[str, Any]:
@@ -1112,7 +1126,9 @@ echo "[*] Native exploit chain completed"
                         )
                         if root_test.returncode == 0 and "uid=0" in root_test.stdout:
                             results["root_access"] = True
-                    except:
+                    except Exception as e:
+
+                        print(f"Error in {}: {{e}}".format("sandbox_escape.py"))
                         pass
 
                     # Add recommendations
@@ -1205,3 +1221,10 @@ Note: This module implements advanced security research techniques for authorize
 device modification. All operations maintain comprehensive audit trails and 
 should only be used on devices you own or have explicit authorization to modify.
 """
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

@@ -261,7 +261,9 @@ class AndroidSystemInfo:
             )
             if result.returncode == 0 and "permissive" in result.stdout.lower():
                 root_indicators["selinux_permissive"] = True
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("android_utils.py"))
             pass
         
         # Check write access to system
@@ -271,7 +273,9 @@ class AndroidSystemInfo:
                 f.write("test")
             os.remove(test_file)
             root_indicators["write_access"] = True
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("android_utils.py"))
             pass
         
         return root_indicators
@@ -281,7 +285,9 @@ class AndroidSystemInfo:
         try:
             current_version = self.get_android_version()
             return current_version >= min_version
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("android_utils.py"))
             return False
     
     def is_termux_environment(self) -> bool:
@@ -386,3 +392,10 @@ def optimize_for_mobile() -> Dict[str, Any]:
 # [2] Internal: /reference_vault/COPILOT_CORE_INSTRUCTIONS.md#system-analysis
 # [3] External: Android Developer Documentation - System information APIs
 # [4] Standard: Linux /proc filesystem documentation
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

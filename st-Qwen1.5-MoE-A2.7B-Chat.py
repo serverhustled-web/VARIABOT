@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import sys
 from gradio_client import Client
+import os
 
 # Internal usage
 import os
@@ -17,7 +18,7 @@ if "messages" not in st.session_state:
 
 @st.cache_resource
 def create_client():
-    yourHFtoken = "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxx"  # here your HF token
+    yourHFtoken = os.environ.get("HF_TOKEN", "")  # here your HF token
     print("loading the API gradio client for qwen1.5-MoE-A2.7B-Chat-demo")
     client = Client("Qwen/qwen1.5-MoE-A2.7B-Chat-demo", hf_token=yourHFtoken)
     return client
@@ -85,7 +86,8 @@ if myprompt := st.chat_input("What is an AI model?"):
             #    try:
             #        message_placeholder.markdown(r[1][0][1].replace(full_response,'')+ "▌")
             #        full_response = r[1][0][1]
-            #    except:
+            #    except Exception as e:
+        print(f"Error in {}: {{e}}".format("st-Qwen1.5-MoE-A2.7B-Chat.py"))
             #        pass
 
             # for r in res:
@@ -98,3 +100,9 @@ if myprompt := st.chat_input("What is an AI model?"):
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response}
         )
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Streamlit Documentation — https://docs.streamlit.io/
+# - External: HuggingFace Hub — https://huggingface.co/docs/huggingface_hub/

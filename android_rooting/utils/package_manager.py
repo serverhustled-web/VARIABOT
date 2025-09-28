@@ -496,3 +496,10 @@ References and Citations:
 4. Termux API Reference: https://wiki.termux.com/wiki/Termux:API
 5. Python packaging in Termux: https://wiki.termux.com/wiki/Python
 """
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/linux_kali_android.md#android-rooting
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Android Developer Guide — https://developer.android.com/guide
+# - External: Magisk Documentation — https://topjohnwu.github.io/Magisk/

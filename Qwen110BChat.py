@@ -2,10 +2,16 @@
 # https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo
 import time
 import sys
+import os
 from gradio_client import Client
 
-# Set HF API token  and HF repo
-yourHFtoken = "hf_xxxxxxxxxxxxxxxxxxxx"  # here your HF token
+# Set HF API token and HF repo
+yourHFtoken = os.environ.get("HF_TOKEN", "")  # Get token from environment variable
+if not yourHFtoken:
+    print("Warning: HF_TOKEN environment variable not set. Please set it with your HuggingFace token.")
+    print("Usage: export HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxx")
+    sys.exit(1)
+
 repo = "Qwen/Qwen1.5-110B-Chat-demo"
 
 

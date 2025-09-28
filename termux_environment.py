@@ -79,7 +79,9 @@ class TermuxEnvironment:
                                   capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
-        except:
+        except Exception as e:
+
+            print(f"Error in {}: {{e}}".format("termux_environment.py"))
             pass
         
         # Fallback: analyze runtime paths
@@ -96,7 +98,9 @@ class TermuxEnvironment:
             try:
                 sdk_part = se_info.split('targetSdkVersion=')[1].split(':')[0]
                 return int(sdk_part)
-            except:
+            except Exception as e:
+
+                print(f"Error in {}: {{e}}".format("termux_environment.py"))
                 pass
         return 28  # Default from the provided environment
     
@@ -314,3 +318,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Python Documentation — https://docs.python.org/3/

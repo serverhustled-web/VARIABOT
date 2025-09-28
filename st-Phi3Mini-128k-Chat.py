@@ -85,3 +85,9 @@ if myprompt := st.chat_input("What is an AI model?"):
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response}
         )
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Streamlit Documentation — https://docs.streamlit.io/
+# - External: HuggingFace Hub — https://huggingface.co/docs/huggingface_hub/
