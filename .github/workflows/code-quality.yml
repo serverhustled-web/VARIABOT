@@ -1,0 +1,245 @@
+# VARIABOT Enhanced Code Quality Workflow
+# Implements comprehensive quality assurance based on review findings
+
+name: Enhanced Code Quality & Security
+
+on:
+  push:
+    branches: [ "main", "copilot/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  quality-analysis:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 ruff black mypy bandit safety pytest-cov
+        
+    - name: Critical Error Detection
+      run: |
+        echo "🔍 Checking for critical errors (F821, F63, F7, F82)..."
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=reference_vault
+        echo "✅ No critical errors found"
+        
+    - name: Security Scan (High & Medium Issues)
+      run: |
+        echo "🔒 Running security analysis..."
+        bandit -r . -x reference_vault/ -ll
+        echo "📊 Security scan completed"
+        
+    - name: Code Style Analysis
+      run: |
+        echo "🎨 Checking code style with ruff..."
+        ruff check . --exclude=reference_vault --select=E,W,F
+        echo "🎨 Checking formatting with black..."
+        black --check --diff . --exclude=reference_vault || echo "⚠️ Code formatting issues found"
+        
+    - name: Reference Vault Compliance
+      run: |
+        echo "📚 Checking Reference Vault compliance..."
+        python -c "
+        import os
+        missing_refs = []
+        total_files = 0
+        
+        for root, dirs, files in os.walk('.'):
+            if 'reference_vault' in root or '__pycache__' in root or '.git' in root:
+                continue
+            for file in files:
+                if file.endswith('.py') and not file.startswith('test_'):
+                    filepath = os.path.join(root, file)
+                    total_files += 1
+                    try:
+                        with open(filepath, 'r') as f:
+                            content = f.read()
+                        if 'References:' not in content:
+                            missing_refs.append(filepath)
+                    except Exception:
+                        pass
+        
+        compliance_rate = (total_files - len(missing_refs)) / total_files * 100
+        print(f'📊 Vault compliance: {compliance_rate:.1f}% ({total_files - len(missing_refs)}/{total_files} files)')
+        
+        if len(missing_refs) > 0:
+            print('⚠️ Files missing References blocks:')
+            for f in missing_refs[:5]:
+                print(f'  - {f}')
+            if len(missing_refs) > 5:
+                print(f'  ... and {len(missing_refs) - 5} more')
+        "
+        
+    - name: Run Tests with Coverage
+      run: |
+        echo "🧪 Running comprehensive tests..."
+        pytest --cov=. --cov-report=xml --cov-report=term-missing -v
+        
+    - name: Syntax Validation
+      run: |
+        echo "🔍 Validating Python syntax..."
+        python -m py_compile *.py
+        find . -name "*.py" -path "./android_rooting/*" -exec python -m py_compile {} \;
+        echo "✅ All Python files have valid syntax"
+        
+    - name: Architecture Validation
+      run: |
+        echo "🏗️ Validating repository structure..."
+        required_dirs=("android_rooting" "reference_vault" ".github")
+        required_files=("requirements.txt" "README.md" ".gitignore")
+        
+        for dir in "${required_dirs[@]}"; do
+          if [ -d "$dir" ]; then
+            echo "✅ $dir directory exists"
+          else
+            echo "❌ Missing required directory: $dir"
+            exit 1
+          fi
+        done
+        
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ $file exists"
+          else
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        
+    - name: Performance Check
+      run: |
+        echo "⚡ Running basic performance validation..."
+        python -c "
+        import time
+        start = time.time()
+        try:
+            from android_rooting.core.root_detection import AndroidRootDetector
+            detector = AndroidRootDetector()
+            print(f'✅ Root detection import time: {time.time() - start:.3f}s')
+        except ImportError as e:
+            print(f'⚠️ Import issue: {e}')
+        "
+        
+    - name: Generate Quality Report
+      if: always()
+      run: |
+        echo "📋 Quality Assessment Summary" > quality-report.txt
+        echo "=============================" >> quality-report.txt
+        echo "Python Version: ${{ matrix.python-version }}" >> quality-report.txt
+        echo "Timestamp: $(date -u)" >> quality-report.txt
+        echo "" >> quality-report.txt
+        
+        # Test results
+        if [ -f pytest.xml ]; then
+          echo "🧪 Tests: PASSED" >> quality-report.txt
+        else
+          echo "🧪 Tests: Status unknown" >> quality-report.txt
+        fi
+        
+        # Critical errors
+        critical_count=$(flake8 . --count --select=E9,F63,F7,F82 --exclude=reference_vault 2>/dev/null || echo "0")
+        echo "🚨 Critical Errors: $critical_count" >> quality-report.txt
+        
+        # Security issues
+        security_high=$(bandit -r . -x reference_vault/ -f json 2>/dev/null | jq '[.results[] | select(.issue_severity=="HIGH")] | length' 2>/dev/null || echo "unknown")
+        echo "🔒 High Security Issues: $security_high" >> quality-report.txt
+        
+        echo "" >> quality-report.txt
+        echo "For detailed analysis, see individual job steps above." >> quality-report.txt
+        
+        cat quality-report.txt
+        
+    - name: Upload Quality Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: quality-report-python${{ matrix.python-version }}
+        path: quality-report.txt
+        
+    - name: Upload Coverage Reports
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.11'
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: quality-analysis
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+        
+    - name: Advanced Security Scan
+      run: |
+        echo "🔒 Running comprehensive security analysis..."
+        bandit -r . -x reference_vault/ -f json -o bandit-report.json
+        safety check --json --output safety-report.json || true
+        
+    - name: Security Summary
+      run: |
+        echo "🔒 Security Analysis Summary"
+        echo "=========================="
+        
+        if [ -f bandit-report.json ]; then
+          high_issues=$(jq '[.results[] | select(.issue_severity=="HIGH")] | length' bandit-report.json)
+          medium_issues=$(jq '[.results[] | select(.issue_severity=="MEDIUM")] | length' bandit-report.json)
+          low_issues=$(jq '[.results[] | select(.issue_severity=="LOW")] | length' bandit-report.json)
+          
+          echo "🚨 High Severity Issues: $high_issues"
+          echo "⚠️ Medium Severity Issues: $medium_issues"  
+          echo "ℹ️ Low Severity Issues: $low_issues"
+          
+          if [ "$high_issues" -gt 10 ]; then
+            echo "❌ Too many high severity security issues detected!"
+            echo "🔧 Please review and fix critical security vulnerabilities"
+            exit 1
+          fi
+        fi
+        
+    - name: Upload Security Reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json

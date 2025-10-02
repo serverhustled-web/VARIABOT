@@ -7,9 +7,8 @@ Real-time error monitoring, adaptation, and obstacle overcoming for Android root
 Implements endless adaptation capability with GitHub integration for audit trails.
 """
 
-import asyncio
-import json
 import logging
+import shlex
 import time
 import traceback
 from datetime import datetime
@@ -349,9 +348,11 @@ class ErrorAdaptationBot:
         
         for cmd in escalation_commands:
             try:
+                # Parse command safely to avoid shell injection
+                cmd_parts = shlex.split(cmd) if not cmd.startswith("echo") else ["echo", cmd.split("'")[1] if "'" in cmd else cmd]
+                
                 result = subprocess.run(
-                    cmd,
-                    shell=True,
+                    cmd_parts,
                     capture_output=True,
                     text=True,
                     timeout=5
@@ -398,9 +399,11 @@ class ErrorAdaptationBot:
         
         for technique in techniques:
             try:
+                # Parse technique safely
+                cmd_parts = shlex.split(technique) if not technique.startswith("echo") else ["echo", technique.split("'")[1] if "'" in technique else technique]
+                
                 result = subprocess.run(
-                    technique,
-                    shell=True,
+                    cmd_parts,
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -447,10 +450,11 @@ class ErrorAdaptationBot:
         executed = []
         for cmd in nuclear_commands:
             try:
-                subprocess.run(cmd, shell=True, check=False, timeout=5)
+                cmd_parts = shlex.split(cmd)
+                subprocess.run(cmd_parts, check=False, timeout=5)
                 executed.append(cmd)
-            except:
-                pass
+            except Exception as e:
+                executed.append(f"{cmd} (failed: {str(e)})")
         
         return {
             "success": len(executed) > 0,

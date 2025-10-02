@@ -1,0 +1,75 @@
+# Android Rooting Framework Testing Workflow - Simplified
+name: Android Rooting Tests
+
+on:
+  push:
+    branches: [ "main", "copilot/*" ]
+    paths: 
+      - 'android_rooting/**'
+      - 'test_android_rooting.py'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'android_rooting/**'
+      - 'test_android_rooting.py'
+
+permissions:
+  contents: read
+
+jobs:
+  android-framework-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-mock
+        
+    - name: Test Android System Detection
+      run: |
+        echo "🔍 Testing Android system detection capabilities..."
+        python -c "from android_rooting.core.root_detection import AndroidRootDetector; detector = AndroidRootDetector(); print('✅ Root detection system initialized')"
+        
+    - name: Test Termux Compatibility
+      run: |
+        echo "📱 Testing Termux environment compatibility..."
+        python -c "from android_rooting.utils.termux_compat import TermuxCompatibility; compat = TermuxCompatibility(); print('✅ Termux compatibility initialized')"
+        
+    - name: Run Android Rooting Tests
+      run: |
+        echo "🚀 Running Android rooting framework tests..."
+        pytest test_android_rooting.py -v --tb=short
+        
+    - name: Test Privilege Escalation Engine
+      run: |
+        echo "🔐 Testing privilege escalation capabilities..."
+        python -c "from android_rooting.core.privilege_escalation import PrivilegeEscalationEngine; engine = PrivilegeEscalationEngine(); print(f'Available methods: {len(engine.escalation_methods)}'); print('✅ Privilege escalation engine functional')"
+        
+    - name: Validate Logging System
+      run: |
+        echo "📝 Testing comprehensive logging system..."
+        python -c "from android_rooting.utils.logging_system import AndroidRootLogger; logger = AndroidRootLogger('test_session'); logger.info('Test log entry'); print('✅ Logging system operational')"
+        
+    - name: Generate Test Report
+      run: |
+        echo "📊 Generating Android testing report..."
+        echo "Android Rooting Framework Test Report" > android-test-report.txt
+        echo "=====================================" >> android-test-report.txt
+        echo "Timestamp: $(date)" >> android-test-report.txt
+        echo "Status: All tests completed successfully" >> android-test-report.txt
+        
+    - name: Upload Test Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: android-test-report
+        path: android-test-report.txt
