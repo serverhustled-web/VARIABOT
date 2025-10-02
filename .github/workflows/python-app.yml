@@ -154,7 +154,7 @@ for file in model_files:
         safety check || echo "Dependency scan completed with warnings"
         
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
