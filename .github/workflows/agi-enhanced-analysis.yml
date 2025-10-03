@@ -1,0 +1,38 @@
+jobs:
+  agi_analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install Gemini CLI
+      run: npm install -g @google/generative-ai
+    - env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      name: Configure Gemini CLI
+      run: python3 gemini_cli_integration.py --configure
+    - env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      name: Run AGI Enhanced Analysis
+      run: python3 gemini_cli_integration.py --analyze
+    - name: Upload AGI Analysis Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: agi-analysis-results
+        path: advanced_integrations/gemini_cli/analysis_results/
+    timeout-minutes: 120
+name: VARIABOT AGI Enhanced Analysis
+'on':
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+    - develop
+  schedule:
+  - cron: 0 6 * * *

@@ -1,0 +1,59 @@
+{
+  "model": {
+    "maxSessionTurns": 50,
+    "temperature": 0.7,
+    "topP": 0.9,
+    "maxOutputTokens": 8192
+  },
+  "tools": {
+    "core": [
+      "str_replace_editor",
+      "bash",
+      "playwright-browser_navigate",
+      "github-mcp-server-search_code",
+      "github-mcp-server-get_file_contents"
+    ],
+    "android_rooting": [
+      "privilege_escalation",
+      "magisk_integration",
+      "termux_compatibility"
+    ],
+    "agi_enhanced": [
+      "quantum_processing",
+      "admin_compliance",
+      "system_optimization"
+    ]
+  },
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/runner/work/VARIABOT/VARIABOT"
+      ]
+    },
+    "android_framework": {
+      "command": "python3",
+      "args": [
+        "/home/runner/work/VARIABOT/VARIABOT/android_rooting/core/mcp_server.py"
+      ]
+    }
+  },
+  "variabot": {
+    "android_target": "Android 13 ARM64",
+    "exploit_mode": "comprehensive",
+    "compliance_level": "production",
+    "quantum_enhanced": true
+  }
+}
