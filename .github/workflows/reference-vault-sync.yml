@@ -1,0 +1,415 @@
+name: Reference Vault Synchronization
+
+on:
+  push:
+    paths:
+      - 'reference_vault/**'
+    branches: [ "main" ]
+  pull_request:
+    paths:
+      - 'reference_vault/**'
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  validate-vault:
+    runs-on: ubuntu-latest
+    name: Validate Reference Vault Integrity
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Create vault validation script
+      run: |
+        cat > validate_vault.py << 'EOF'
+        #!/usr/bin/env python3
+        """
+        Validate Reference Vault integrity and consistency
+        Ensures all required standards files exist and are properly linked
+        """
+        
+        import os
+        import re
+        from pathlib import Path
+        
+        class VaultValidator:
+            def __init__(self):
+                self.vault_path = Path('reference_vault')
+                self.errors = []
+                self.warnings = []
+                
+                # Required vault files based on ORGANIZATION_STANDARDS.md
+                self.required_files = [
+                    'README.md',
+                    'PRODUCTION_GRADE_STANDARDS.md',
+                    'ORGANIZATION_STANDARDS.md',
+                    'copilot_instructions.md',
+                    'linux_kali_android.md',
+                    'standards.md',
+                    'audit_trail.md',
+                    'external_sources.md'
+                ]
+                
+            def validate_structure(self):
+                """Validate vault directory structure"""
+                if not self.vault_path.exists():
+                    self.errors.append("Reference vault directory missing")
+                    return
+                    
+                for required_file in self.required_files:
+                    file_path = self.vault_path / required_file
+                    if not file_path.exists():
+                        self.errors.append(f"Required vault file missing: {required_file}")
+                    elif file_path.stat().st_size == 0:
+                        self.warnings.append(f"Vault file is empty: {required_file}")
+                        
+            def validate_internal_links(self):
+                """Validate internal references between vault files"""
+                for vault_file in self.vault_path.rglob('*.md'):
+                    try:
+                        with open(vault_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            
+                        # Find internal references
+                        internal_refs = re.findall(r'/reference_vault/([^#\s)]+)', content)
+                        
+                        for ref in internal_refs:
+                            ref_path = self.vault_path / ref
+                            if not ref_path.exists():
+                                self.errors.append(f"Broken internal reference in {vault_file.name}: {ref}")
+                                
+                    except Exception as e:
+                        self.warnings.append(f"Could not validate links in {vault_file.name}: {e}")
+                        
+            def validate_external_links(self):
+                """Check external references are properly documented"""
+                external_sources_file = self.vault_path / 'external_sources.md'
+                
+                if not external_sources_file.exists():
+                    self.warnings.append("external_sources.md missing - cannot validate external references")
+                    return
+                    
+                try:
+                    with open(external_sources_file, 'r', encoding='utf-8') as f:
+                        external_content = f.read()
+                        
+                    # Find all external URLs in vault files
+                    all_external_urls = set()
+                    
+                    for vault_file in self.vault_path.rglob('*.md'):
+                        with open(vault_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            
+                        # Find external URLs
+                        urls = re.findall(r'https?://[^\s)]+', content)
+                        all_external_urls.update(urls)
+                        
+                    # Check if external URLs are documented
+                    undocumented_urls = []
+                    for url in all_external_urls:
+                        if url not in external_content:
+                            undocumented_urls.append(url)
+                            
+                    if undocumented_urls:
+                        self.warnings.append(f"Undocumented external URLs found: {len(undocumented_urls)} URLs")
+                        
+                except Exception as e:
+                    self.warnings.append(f"Could not validate external links: {e}")
+                    
+            def validate_consistency(self):
+                """Check consistency across vault files"""
+                try:
+                    # Check version consistency
+                    version_pattern = r'Document Version.*?(\d+\.\d+\.\d+)'
+                    versions = {}
+                    
+                    for vault_file in self.vault_path.rglob('*.md'):
+                        with open(vault_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            
+                        version_match = re.search(version_pattern, content)
+                        if version_match:
+                            versions[vault_file.name] = version_match.group(1)
+                            
+                    # Check for major version inconsistencies
+                    if versions:
+                        major_versions = [v.split('.')[0] for v in versions.values()]
+                        if len(set(major_versions)) > 1:
+                            self.warnings.append(f"Inconsistent major versions across vault files: {versions}")
+                            
+                except Exception as e:
+                    self.warnings.append(f"Could not validate consistency: {e}")
+                    
+            def generate_report(self):
+                """Generate validation report"""
+                report = "# Reference Vault Validation Report\n\n"
+                
+                if not self.errors and not self.warnings:
+                    report += "✅ **All validations passed** - Reference vault is healthy\n\n"
+                else:
+                    if self.errors:
+                        report += f"## ❌ Errors ({len(self.errors)})\n\n"
+                        for error in self.errors:
+                            report += f"- {error}\n"
+                        report += "\n"
+                        
+                    if self.warnings:
+                        report += f"## ⚠️ Warnings ({len(self.warnings)})\n\n"
+                        for warning in self.warnings:
+                            report += f"- {warning}\n"
+                        report += "\n"
+                        
+                report += "## 📋 Validation Summary\n\n"
+                report += f"- Required files: {len(self.required_files)}\n"
+                report += f"- Files found: {len(list(self.vault_path.rglob('*.md'))) if self.vault_path.exists() else 0}\n"
+                report += f"- Errors: {len(self.errors)}\n"
+                report += f"- Warnings: {len(self.warnings)}\n"
+                
+                return report
+                
+            def run_validation(self):
+                """Run all validation checks"""
+                self.validate_structure()
+                self.validate_internal_links()
+                self.validate_external_links()
+                self.validate_consistency()
+                
+                return not bool(self.errors)  # Return True if no errors
+        
+        if __name__ == "__main__":
+            validator = VaultValidator()
+            success = validator.run_validation()
+            
+            report = validator.generate_report()
+            print(report)
+            
+            # Save report for artifact upload
+            with open('vault_validation_report.txt', 'w') as f:
+                f.write(report)
+                
+            exit(0 if success else 1)
+        EOF
+        
+    - name: Run vault validation
+      run: |
+        python validate_vault.py > validation_output.txt 2>&1 || true
+        
+    - name: Display validation results
+      run: |
+        echo "=== REFERENCE VAULT VALIDATION RESULTS ==="
+        cat validation_output.txt
+        
+    - name: Check vault references in codebase
+      run: |
+        echo "=== CHECKING VAULT REFERENCES IN CODEBASE ==="
+        
+        # Count files with vault references
+        vault_refs=$(find . -name "*.py" -o -name "*.sh" -o -name "*.md" | grep -v ".git" | xargs grep -l "reference_vault" | wc -l)
+        total_files=$(find . -name "*.py" -o -name "*.sh" -o -name "*.md" | grep -v ".git" | wc -l)
+        
+        echo "Files with vault references: $vault_refs"
+        echo "Total applicable files: $total_files"
+        
+        if [ $vault_refs -gt 0 ]; then
+          coverage=$((vault_refs * 100 / total_files))
+          echo "Vault reference coverage: ${coverage}%"
+          
+          if [ $coverage -lt 50 ]; then
+            echo "⚠️ Low vault reference coverage - consider adding more references"
+          else
+            echo "✅ Good vault reference coverage"
+          fi
+        fi
+        
+    - name: Create vault sync script
+      run: |
+        cat > sync_vault_changes.py << 'EOF'
+        #!/usr/bin/env python3
+        """
+        Synchronize vault changes across the repository
+        Updates version numbers and ensures consistency
+        """
+        
+        import os
+        import re
+        from pathlib import Path
+        from datetime import datetime
+        
+        def update_vault_references():
+            """Update references to vault files across the repository"""
+            changed_files = []
+            
+            # Get list of changed vault files
+            try:
+                import subprocess
+                result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1', 'reference_vault/'], 
+                                      capture_output=True, text=True)
+                changed_vault_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+            except:
+                changed_vault_files = []
+                
+            if not changed_vault_files:
+                print("No vault files changed")
+                return changed_files
+                
+            print(f"Changed vault files: {changed_vault_files}")
+            
+            # Find files that reference these vault files
+            for root, dirs, files in os.walk('.'):
+                if '.git' in root or '__pycache__' in root:
+                    continue
+                    
+                for file in files:
+                    if file.endswith(('.py', '.sh', '.md')):
+                        file_path = os.path.join(root, file)
+                        
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                                
+                            original_content = content
+                            modified = False
+                            
+                            # Update last modified dates in references
+                            today = datetime.now().strftime('%Y-%m-%d')
+                            content = re.sub(
+                                r'(# - Internal: /reference_vault/[^#\n]+).*',
+                                rf'\1 (last updated: {today})',
+                                content
+                            )
+                            
+                            if content != original_content:
+                                with open(file_path, 'w', encoding='utf-8') as f:
+                                    f.write(content)
+                                changed_files.append(file_path)
+                                modified = True
+                                
+                        except Exception as e:
+                            print(f"Error processing {file_path}: {e}")
+                            
+            return changed_files
+        
+        if __name__ == "__main__":
+            changed = update_vault_references()
+            print(f"Updated {len(changed)} files with vault reference changes")
+            
+            for file in changed:
+                print(f"  - {file}")
+        EOF
+        
+    - name: Sync vault changes
+      run: |
+        python sync_vault_changes.py
+        
+    - name: Update audit trail
+      if: github.event_name == 'push'
+      run: |
+        # Update audit trail with vault changes
+        if [ -f reference_vault/audit_trail.md ]; then
+          cat >> reference_vault/audit_trail.md << EOF
+        
+        ### $(date '+%Y-%m-%d'): Reference Vault Update
+        
+        **Type:** Vault Synchronization  
+        **Trigger:** Automated workflow  
+        **Changes:** Vault files modified or validated
+        
+        #### Validation Results
+        \`\`\`
+        $(cat validation_output.txt)
+        \`\`\`
+        
+        EOF
+        fi
+        
+    - name: Commit vault sync changes
+      if: github.event_name == 'push'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        if [ -n "$(git status --porcelain)" ]; then
+          git add .
+          git commit -m "Auto-sync: Reference vault changes
+          
+          - Updated vault references across codebase
+          - Synchronized version information
+          - Updated audit trail
+          
+          Co-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          
+          git push
+          echo "✅ Vault sync changes committed and pushed"
+        else
+          echo "No sync changes to commit"
+        fi
+        
+    - name: Upload validation artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: vault-validation
+        path: |
+          validation_output.txt
+          vault_validation_report.txt
+        retention-days: 30
+        
+    - name: Comment on PR with validation results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          let validationResults = '';
+          
+          try {
+            validationResults = fs.readFileSync('validation_output.txt', 'utf8');
+          } catch (error) {
+            validationResults = 'Validation results not available';
+          }
+          
+          const body = `## 📚 Reference Vault Validation Results
+          
+          This PR modifies files in the reference vault. The vault has been automatically validated for consistency and integrity.
+          
+          <details>
+          <summary>Validation Report</summary>
+          
+          \`\`\`
+          ${validationResults}
+          \`\`\`
+          
+          </details>
+          
+          ### What This Validation Checks:
+          - ✅ Required vault files exist
+          - ✅ Internal references are valid
+          - ✅ External links are documented
+          - ✅ Version consistency across files
+          - ✅ Vault reference coverage in codebase
+          
+          **Note:** The reference vault serves as the single source of truth for all VARIABOT standards.
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+
+# References:
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#reference-vault-structure
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#documentation-standards
+# - External: GitHub Actions Documentation — https://docs.github.com/en/actions

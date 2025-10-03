@@ -5,7 +5,7 @@
 # Handles restricted environment operations and mobile device constraints
 #
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on any error, undefined vars, pipe failures
 
 # Colors for output
 RED='\033[0;31m'
@@ -539,3 +539,10 @@ main() {
 
 # Run main installation
 main "$@"
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#deployment-standards
+# - Internal: /reference_vault/linux_kali_android.md#termux-setup
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Termux Installation Guide — https://termux.dev/docs/
+# - External: Android Storage Permissions — https://developer.android.com/guide/topics/providers/document-provider

@@ -134,7 +134,9 @@ class VariabotUniversalInterface:
                                   capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and result.stdout.strip():
                 android_version = result.stdout.strip()
-        except:
+        except Exception as e:
+
+            print(f"Error in variabot_universal.py: {e}")
             pass
         
         return android_version
@@ -522,3 +524,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#development-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: Python Documentation — https://docs.python.org/3/

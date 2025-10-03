@@ -1,0 +1,389 @@
+name: Security Audit & Secret Scanning
+
+on:
+  push:
+    branches: [ "main", "copilot/*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    # Run daily at 3 AM UTC
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  secret-scanning:
+    runs-on: ubuntu-latest
+    name: Advanced Secret Scanning
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety detect-secrets
+        # Install additional secret scanners
+        wget -q https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_linux_amd64.tar.gz
+        tar -xzf trufflehog_linux_amd64.tar.gz
+        sudo mv trufflehog /usr/local/bin/
+        
+    - name: Create comprehensive secret scanner script
+      run: |
+        cat > security_scanner.py << 'EOF'
+        #!/usr/bin/env python3
+        """
+        Comprehensive security scanner for VARIABOT repository
+        Detects hardcoded secrets, API keys, and security vulnerabilities
+        """
+        
+        import os
+        import re
+        import json
+        import subprocess
+        from pathlib import Path
+        
+        class SecurityScanner:
+            def __init__(self):
+                self.violations = []
+                self.patterns = {
+                    'hf_token': r'["\']hf_[a-zA-Z0-9_-]{20,}["\']',
+                    'api_key': r'["\'](?:api[_-]?key|apikey)["\']:\s*["\'][a-zA-Z0-9_-]{20,}["\']',
+                    'password': r'["\'](?:password|passwd|pwd)["\']:\s*["\'][^"\']{8,}["\']',
+                    'secret': r'["\'](?:secret|secret[_-]?key)["\']:\s*["\'][a-zA-Z0-9_-]{20,}["\']',
+                    'private_key': r'-----BEGIN (?:RSA )?PRIVATE KEY-----',
+                    'aws_key': r'AKIA[0-9A-Z]{16}',
+                    'github_token': r'ghp_[a-zA-Z0-9]{36}',
+                    'slack_token': r'xox[baprs]-[a-zA-Z0-9-]+',
+                }
+                
+            def scan_file(self, file_path):
+                """Scan a single file for security issues"""
+                try:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    
+                    for pattern_name, pattern in self.patterns.items():
+                        matches = re.finditer(pattern, content, re.IGNORECASE)
+                        for match in matches:
+                            # Skip if it's obviously a placeholder
+                            matched_text = match.group(0)
+                            if any(placeholder in matched_text.lower() for placeholder in 
+                                   ['xxx', 'example', 'placeholder', 'your_', 'replace_me']):
+                                continue
+                                
+                            self.violations.append({
+                                'file': str(file_path),
+                                'type': pattern_name,
+                                'line': content[:match.start()].count('\n') + 1,
+                                'text': matched_text[:50] + '...' if len(matched_text) > 50 else matched_text
+                            })
+                            
+                except Exception as e:
+                    print(f"Error scanning {file_path}: {e}")
+                    
+            def scan_repository(self):
+                """Scan entire repository for security issues"""
+                repo_root = Path('.')
+                
+                for file_path in repo_root.rglob('*'):
+                    if file_path.is_file() and not any(exclude in str(file_path) for exclude in 
+                                                      ['.git', '__pycache__', '.pyc', '.png', '.jpg', '.gif']):
+                        self.scan_file(file_path)
+                        
+            def generate_report(self):
+                """Generate security report"""
+                if not self.violations:
+                    return "✅ No security violations found"
+                    
+                report = f"🚨 Found {len(self.violations)} potential security issues:\n\n"
+                
+                for violation in self.violations:
+                    report += f"- **{violation['type']}** in `{violation['file']}` (line {violation['line']})\n"
+                    report += f"  Text: `{violation['text']}`\n\n"
+                    
+                return report
+                
+            def export_json(self, filename):
+                """Export results as JSON"""
+                with open(filename, 'w') as f:
+                    json.dump(self.violations, f, indent=2)
+        
+        if __name__ == "__main__":
+            scanner = SecurityScanner()
+            scanner.scan_repository()
+            
+            report = scanner.generate_report()
+            print(report)
+            
+            scanner.export_json('security_violations.json')
+            
+            # Exit with error code if violations found
+            exit(1 if scanner.violations else 0)
+        EOF
+        
+    - name: Run comprehensive secret scan
+      run: |
+        python security_scanner.py > security_report.txt 2>&1 || true
+        
+    - name: Run TruffleHog secret scan
+      run: |
+        trufflehog filesystem . --json > trufflehog_results.json 2>/dev/null || true
+        
+    - name: Run Bandit security scan
+      run: |
+        bandit -r . -f json -o bandit_results.json --exclude=reference_vault/ || true
+        bandit -r . --exclude=reference_vault/ > bandit_report.txt 2>&1 || true
+        
+    - name: Run Safety dependency scan
+      run: |
+        safety check --json --output safety_results.json || true
+        safety check > safety_report.txt 2>&1 || true
+        
+    - name: Check for detect-secrets
+      run: |
+        detect-secrets scan --all-files > .secrets.baseline 2>/dev/null || true
+        if [ -f .secrets.baseline ]; then
+          detect-secrets audit .secrets.baseline --report --output detect_secrets_report.txt || true
+        fi
+        
+    - name: Analyze results and create summary
+      run: |
+        cat > analyze_security.py << 'EOF'
+        import json
+        import os
+        
+        def analyze_results():
+            summary = {
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0,
+                'issues': []
+            }
+            
+            # Analyze custom scanner results
+            if os.path.exists('security_violations.json'):
+                with open('security_violations.json', 'r') as f:
+                    violations = json.load(f)
+                    summary['critical'] += len([v for v in violations if v['type'] in ['private_key', 'aws_key']])
+                    summary['high'] += len([v for v in violations if v['type'] in ['hf_token', 'github_token']])
+                    summary['medium'] += len([v for v in violations if v['type'] in ['api_key', 'secret']])
+                    summary['low'] += len([v for v in violations if v['type'] in ['password']])
+                    
+            # Analyze Bandit results
+            if os.path.exists('bandit_results.json'):
+                try:
+                    with open('bandit_results.json', 'r') as f:
+                        bandit_data = json.load(f)
+                        for result in bandit_data.get('results', []):
+                            severity = result.get('issue_severity', 'LOW').upper()
+                            if severity == 'HIGH':
+                                summary['high'] += 1
+                            elif severity == 'MEDIUM':
+                                summary['medium'] += 1
+                            else:
+                                summary['low'] += 1
+                except:
+                    pass
+                    
+            # Generate summary report
+            total_issues = summary['critical'] + summary['high'] + summary['medium'] + summary['low']
+            
+            report = f"""# Security Audit Summary
+        
+        ## 📊 Issue Breakdown
+        - 🔴 Critical: {summary['critical']}
+        - 🟠 High: {summary['high']}
+        - 🟡 Medium: {summary['medium']}
+        - 🟢 Low: {summary['low']}
+        
+        **Total Issues:** {total_issues}
+        
+        ## 🎯 Security Status
+        """
+            
+            if summary['critical'] > 0:
+                report += "❌ **CRITICAL SECURITY ISSUES FOUND** - Immediate action required!\n"
+                status = "critical"
+            elif summary['high'] > 0:
+                report += "⚠️ **HIGH SECURITY ISSUES FOUND** - Should be addressed promptly\n"
+                status = "high"
+            elif summary['medium'] > 0:
+                report += "🟡 **MEDIUM SECURITY ISSUES FOUND** - Review and address when possible\n"
+                status = "medium"
+            elif summary['low'] > 0:
+                report += "🟢 **LOW SECURITY ISSUES FOUND** - Minor issues, address during regular maintenance\n"
+                status = "low"
+            else:
+                report += "✅ **NO SECURITY ISSUES FOUND** - Repository appears secure\n"
+                status = "clean"
+                
+            with open('security_summary.txt', 'w') as f:
+                f.write(report)
+                
+            with open('security_status.txt', 'w') as f:
+                f.write(status)
+                
+            print(report)
+            return status
+        
+        if __name__ == "__main__":
+            status = analyze_results()
+            exit(1 if status in ['critical', 'high'] else 0)
+        EOF
+        
+        python analyze_security.py || true
+        
+    - name: Display security results
+      run: |
+        echo "=== SECURITY SCAN RESULTS ==="
+        if [ -f security_summary.txt ]; then
+          cat security_summary.txt
+        fi
+        
+        echo ""
+        echo "=== DETAILED REPORTS ==="
+        echo "Custom Scanner:"
+        if [ -f security_report.txt ]; then
+          cat security_report.txt
+        fi
+        
+        echo ""
+        echo "Bandit Results:"
+        if [ -f bandit_report.txt ]; then
+          head -50 bandit_report.txt
+        fi
+        
+    - name: Upload security artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          security_report.txt
+          security_summary.txt
+          security_violations.json
+          trufflehog_results.json
+          bandit_results.json
+          bandit_report.txt
+          safety_results.json
+          safety_report.txt
+          detect_secrets_report.txt
+        retention-days: 30
+        
+    - name: Create security issue
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let status = 'unknown';
+          let summary = 'Security scan completed';
+          
+          try {
+            status = fs.readFileSync('security_status.txt', 'utf8').trim();
+            summary = fs.readFileSync('security_summary.txt', 'utf8');
+          } catch (error) {
+            console.log('Could not read security results');
+          }
+          
+          if (status === 'critical' || status === 'high') {
+            const title = `🚨 Security Issues Found - ${status.toUpperCase()} Priority`;
+            const body = `# Security Audit Results
+        
+        ${summary}
+        
+        ## Actions Required
+        
+        ${status === 'critical' ? 
+          '🔴 **CRITICAL**: These issues pose immediate security risks and must be addressed immediately.' :
+          '🟠 **HIGH**: These issues should be addressed promptly to maintain security posture.'
+        }
+        
+        ## Detailed Reports
+        
+        Please review the uploaded artifacts for detailed information about each issue.
+        
+        ## Next Steps
+        
+        1. Review the security artifacts uploaded to this workflow run
+        2. Address high and critical issues immediately
+        3. Consider running the Code Compliance Auto-Fix workflow for automated remediation
+        4. Re-run this security audit after fixes are applied
+        
+        ---
+        *This issue was automatically created by the Security Audit workflow.*
+        `;
+            
+            // Create issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', status === 'critical' ? 'priority:critical' : 'priority:high']
+            });
+          }
+          
+    - name: Comment on PR with security results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let summary = 'Security scan completed - results not available';
+          
+          try {
+            summary = fs.readFileSync('security_summary.txt', 'utf8');
+          } catch (error) {
+            console.log('Could not read security summary');
+          }
+          
+          const body = `## 🔒 Security Audit Results
+          
+          ${summary}
+          
+          <details>
+          <summary>View detailed security scan information</summary>
+          
+          This PR has been automatically scanned for security vulnerabilities including:
+          - Hardcoded secrets and API keys
+          - Vulnerable dependencies
+          - Common security anti-patterns
+          - Private key exposure
+          
+          Please review the uploaded artifacts for complete details.
+          
+          </details>
+          
+          **Note:** This security audit is based on production-grade security standards.
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+
+# References:
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#security-standards
+# - Internal: /reference_vault/ORGANIZATION_STANDARDS.md#file-organization
+# - External: OWASP Security Guidelines — https://owasp.org/
+# - External: GitHub Security Advisories — https://docs.github.com/en/code-security
