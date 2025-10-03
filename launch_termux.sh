@@ -275,6 +275,13 @@ if ! launch_interface "$INTERFACE" "$EXTRA_ARGS"; then
     exit 1
 fi
 
+# Check and suggest URL opener installation
+if [ ! -f "$TERMUX_HOME/bin/termux-url-opener" ]; then
+    echo ""
+    echo -e "${CYAN}💡 Tip: Install termux-url-opener to share URLs to VARIABOT${NC}"
+    echo -e "${CYAN}   Run: bash bin/install_url_opener.sh${NC}"
+fi
+
 # References:
 # - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#deployment-standards
 # - Internal: /reference_vault/linux_kali_android.md#termux-optimization
