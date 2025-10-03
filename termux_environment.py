@@ -259,6 +259,92 @@ echo "VARIABOT launched for Termux on Android {self.android_info.get('android_ve
 echo "Access at: http://127.0.0.1:8080"
 """
     
+    def setup_url_opener(self) -> Dict[str, str]:
+        """Setup termux-url-opener for VARIABOT integration"""
+        if not self.termux_detected:
+            return {'status': 'skipped', 'reason': 'Not running in Termux'}
+        
+        bin_dir = f"{self.termux_info['home']}/bin"
+        url_opener_path = f"{bin_dir}/termux-url-opener"
+        variabot_url_opener = "bin/termux-url-opener"
+        
+        result = {
+            'bin_dir': bin_dir,
+            'url_opener_path': url_opener_path,
+            'status': 'success'
+        }
+        
+        try:
+            # Create bin directory if it doesn't exist
+            os.makedirs(bin_dir, exist_ok=True)
+            
+            # Check if VARIABOT url opener exists
+            if os.path.exists(variabot_url_opener):
+                # Copy to bin directory
+                import shutil
+                shutil.copy2(variabot_url_opener, url_opener_path)
+                os.chmod(url_opener_path, 0o755)
+                result['installed'] = True
+            else:
+                result['installed'] = False
+                result['message'] = 'termux-url-opener script not found in VARIABOT/bin'
+        except Exception as e:
+            result['status'] = 'error'
+            result['error'] = str(e)
+        
+        return result
+    
+    def get_url_queue(self) -> List[str]:
+        """Get queued URLs for processing"""
+        if not self.termux_detected or not self.termux_info:
+            return []
+        
+        queue_file = f"{self.termux_info['home']}/.variabot/url_queue.txt"
+        
+        if not os.path.exists(queue_file):
+            return []
+        
+        try:
+            with open(queue_file, 'r') as f:
+                urls = [line.strip() for line in f if line.strip()]
+            # Clear the queue file after reading
+            open(queue_file, 'w').close()
+            return urls
+        except Exception as e:
+            print(f"Error reading URL queue: {e}")
+            return []
+    
+    def get_pending_urls(self) -> List[str]:
+        """Get pending URLs that need processing"""
+        if not self.termux_detected or not self.termux_info:
+            return []
+        
+        pending_file = f"{self.termux_info['home']}/.variabot/pending_urls.txt"
+        
+        if not os.path.exists(pending_file):
+            return []
+        
+        try:
+            with open(pending_file, 'r') as f:
+                return [line.strip() for line in f if line.strip()]
+        except Exception as e:
+            print(f"Error reading pending URLs: {e}")
+            return []
+    
+    def clear_pending_urls(self) -> bool:
+        """Clear the pending URLs file"""
+        if not self.termux_detected or not self.termux_info:
+            return False
+        
+        pending_file = f"{self.termux_info['home']}/.variabot/pending_urls.txt"
+        
+        try:
+            open(pending_file, 'w').close()
+            return True
+        except Exception as e:
+            print(f"Error clearing pending URLs: {e}")
+            return False
+    
     def get_environment_report(self) -> Dict[str, Any]:
         """Generate comprehensive environment report"""
         return {
@@ -275,6 +361,7 @@ echo "Access at: http://127.0.0.1:8080"
             'ui_config': self.get_ui_config(),
             'installation_commands': self.get_installation_commands(),
             'launch_script': self.generate_launch_script(),
+            'url_opener_setup': self.setup_url_opener(),
             'environment_variables': {k: v for k, v in self.env_vars.items() 
                                     if k.startswith(('TERMUX', 'ANDROID', 'PREFIX', 'HOME', 'JAVA'))}
         }
