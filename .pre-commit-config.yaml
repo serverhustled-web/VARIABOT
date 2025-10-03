@@ -1,0 +1,101 @@
+# Pre-commit hooks configuration for VARIABOT
+# Enforces zero-tolerance quality standards
+# See: /reference_vault/copilot_instructions.md#quality-enforcement
+
+repos:
+  # Python code formatting
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        args: [--line-length=88]
+        language_version: python3
+
+  # Python import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: [--profile=black]
+
+  # Python linting with comprehensive rules
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.292
+    hooks:
+      - id: ruff
+        args: [--fix, --select=E,F,W,I,N,UP,YTT,S,BLE,B,A,COM,C4,DTZ,T10,EM,ISC,ICN,PIE,PT,Q,RSE,RET,SIM,TID,ARG,PTH,PD,PL,TRY,NPY,RUF]
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports, --check-untyped-defs]
+        additional_dependencies: [types-requests, types-PyYAML]
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  # YAML validation
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+        args: [--safe]
+      - id: check-json
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+
+  # Security scanning
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-ll, -i]
+
+# Fail fast on first error - zero tolerance approach
+fail_fast: false
+
+# Custom hooks for VARIABOT-specific validations
+# These should be implemented as separate scripts in /scripts/ directory:
+#
+# - zero_tolerance_quality_gates.py: Validates production-grade standards
+# - supreme_ai_code_review.py: AI-powered code review automation
+# - autonomous_test_generator.py: Generates tests for new code
+# - security_fortress_scanner.py: Security vulnerability scanning
+#
+# To enable custom hooks, uncomment and ensure scripts exist:
+#
+# - repo: local
+#   hooks:
+#     - id: zero-tolerance-quality-gates
+#       name: Zero Tolerance Quality Gates
+#       entry: python scripts/zero_tolerance_quality_gates.py
+#       language: python
+#       stages: [commit]
+#       pass_filenames: true
+#       verbose: true
+
+# References:
+# - Internal: /reference_vault/copilot_instructions.md#pre-commit-configuration
+# - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#quality-gates
+# - External: pre-commit framework — https://pre-commit.com/
