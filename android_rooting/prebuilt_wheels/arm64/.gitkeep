@@ -1,0 +1,2 @@
+# This directory stores pre-built Python wheels for ARM64 Android devices
+# Place .whl files here for packages that are difficult to compile in Termux
