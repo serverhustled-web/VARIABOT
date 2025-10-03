@@ -59,4 +59,3 @@ jobs:
 References:
 - Internal: /reference_vault/PRODUCTION_GRADE_STANDARDS.md#coding-standards
 - External: Ruff Docs — https://docs.astral.sh/ruff/
-

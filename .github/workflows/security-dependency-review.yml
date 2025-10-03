@@ -1,0 +1,17 @@
+name: Security Scan (Dependency Review)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        # NOTE: This workflow may need to be customized to allow or deny
+        # specific licenses. This can be done by creating a
+        # dependency-review.yml file in the .github/ directory.

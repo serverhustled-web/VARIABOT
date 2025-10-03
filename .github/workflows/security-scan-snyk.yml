@@ -1,0 +1,25 @@
+name: Security Scan (Snyk)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: --all-projects --fail-on=all
+        # NOTE: This workflow may need to be customized to ignore vulnerabilities
+        # that are part of the intended rooting process. This can be done by
+        # creating a .snyk file in the repository.

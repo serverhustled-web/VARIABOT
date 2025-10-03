@@ -1,0 +1,30 @@
+name: Security Scan (Trivy)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/Dockerfile'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build a mock Docker image
+        run: |
+          docker build -t trivy-scan-target:latest .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'trivy-scan-target:latest'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+        # NOTE: This workflow may need to be customized to ignore vulnerabilities
+        # that are part of the intended rooting process. This can be done by
+        # creating a .trivyignore file in the repository.

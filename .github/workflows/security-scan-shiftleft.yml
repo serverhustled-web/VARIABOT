@@ -1,0 +1,21 @@
+name: Security Scan (ShiftLeft)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shiftleft-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Perform ShiftLeft Scan
+        uses: ShiftLeftSecurity/scan-action@master
+        env:
+          SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+        with:
+          output: reports
+        # NOTE: This workflow may need to be customized to ignore specific findings.
+        # This can be done through the ShiftLeft dashboard.

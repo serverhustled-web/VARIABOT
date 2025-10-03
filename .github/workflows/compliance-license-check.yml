@@ -1,0 +1,23 @@
+name: Compliance (License Check)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check licenses
+        uses: da-actions/license-checker-action@v1
+        with:
+          config-file: 'license_checker.json'
+        # NOTE: This workflow requires a license_checker.json file in the root
+        # of the repository with the list of allowed licenses.

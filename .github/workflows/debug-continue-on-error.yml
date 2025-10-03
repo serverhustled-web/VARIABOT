@@ -1,0 +1,20 @@
+name: Debug (Continue on Error)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1 (succeeds)
+        run: echo "This step succeeds."
+
+      - name: Step 2 (fails)
+        continue-on-error: true
+        run: |
+          echo "This step will fail."
+          exit 1
+
+      - name: Step 3 (succeeds)
+        run: echo "This step runs even if the previous one failed."
