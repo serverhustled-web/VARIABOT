@@ -1,0 +1,26 @@
+# Pre-built wheel requirements for Termux/Android ARM64
+# These packages should be installed from pre-built wheels to avoid compilation issues
+
+# Core numerical and data processing
+numpy>=1.21.0
+pandas>=1.5.0
+
+# Image processing
+Pillow>=8.0.0
+
+# Security and cryptography
+cryptography>=40.0.0
+
+# System utilities (if pre-built wheels available)
+psutil>=5.8.0
+
+# Optional: ML/AI packages (if needed and available)
+# scikit-learn>=1.0.0
+# tensorflow-lite>=2.10.0
+# torch>=1.13.0  # Mobile/lite version
+
+# Notes:
+# 1. Install these using: pip install --find-links=./arm64 -r requirements_prebuilt.txt
+# 2. Not all packages may have pre-built wheels - fallback to source if needed
+# 3. Wheels must match: Python version, Android/Linux platform, ARM64 architecture
+# 4. Update this list as new pre-built wheels become available
