@@ -62,17 +62,6 @@ main() {
         run_audit "${script}"
     done
 
-    # --- Auto-Remediation Phase ---
-    echo -e "\n${BOLD}--- Starting FSM Bot Manager ---${NC}" | tee -a "${AUDIT_LOG}"
-    if [ -f "${REPO_ROOT}/fsm_engine/manager.py" ]; then
-        # Run the Bot Manager as a module
-        python3 -m fsm_engine.manager | tee -a "${AUDIT_LOG}"
-    else
-        echo -e "${YELLOW}WARNING: FSM Bot Manager (fsm_engine/manager.py) not found. Skipping auto-remediation.${NC}" | tee -a "${AUDIT_LOG}"
-    fi
-    echo -e "${BOLD}--- FSM Bot Manager Finished ---${NC}" | tee -a "${AUDIT_LOG}"
-
-
     # --- Final Summary ---
     echo -e "\n${BOLD}=== MASTER AUDIT SUMMARY ===${NC}"
     echo -e "Detailed logs are available in: ${BLUE}${AUDIT_LOG}${NC}"

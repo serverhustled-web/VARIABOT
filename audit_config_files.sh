@@ -54,7 +54,7 @@ check_config_prerequisites() {
 audit_yaml() {
     log_info "Auditing YAML files (*.yml, *.yaml)..."
     local files
-    files=$(find . -path ./node_modules -prune -o -name "*.yml" -o -name "*.yaml" -print)
+    files=$(find . -name "*.yml" -o -name "*.yaml")
     if [ -z "$files" ]; then
         log_info "No YAML files found."
         return

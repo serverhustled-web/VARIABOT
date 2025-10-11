@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # audit_web_stack.sh - Audits HTML, CSS, JS, and TS files.
 set -euo pipefail
 

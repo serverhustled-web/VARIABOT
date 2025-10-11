@@ -69,13 +69,3 @@ if __name__ == "__main__":
             print("System contents processed with AGI enhancement")
     else:
         print("Contents-x86_64.gz not found - using simulated analysis")
-
-
-### References
-
-- See /reference_vault/README.md
-
-
-### References
-
-- See /reference_vault/README.md
