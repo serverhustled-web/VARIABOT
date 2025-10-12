@@ -264,7 +264,6 @@ class AndroidRootDetector:
                     
         except Exception as e:
 
-                    
             print(f"Error in root_detection.py: {e}")
             pass
         
@@ -334,7 +333,6 @@ class AndroidRootDetector:
                 
         except Exception as e:
 
-                
             print(f"Error in root_detection.py: {e}")
             pass
         
