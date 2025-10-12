@@ -5,7 +5,6 @@ from gradio_client import Client
 import os
 
 # Internal usage
-import os
 from time import sleep
 
 
