@@ -1,0 +1,32 @@
+{
+  "name": "gemini-plugin-fsm-smc",
+  "version": "1.0.0",
+  "description": "FSM task management with SMC for enhanced code quality in Gemini CLI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": ["gemini-cli", "plugin", "fsm", "smc", "task-management"],
+  "scripts": {
+    "build": "tsc"
+  },
+  "gemini": {
+    "plugin": true,
+    "version": "^2.0.0",
+    "commands": {
+      "fsm-smc-task": {
+        "description": "Manage tasks using SMC-generated FSMs for workflow and code quality",
+        "usage": "gemini fsm-smc-task <subcommand> [options]",
+        "examples": [
+          "gemini fsm-smc-task create --task 'Design API' --workflow 'workflow.png'",
+          "gemini fsm-smc-task transition --task-id 1 --to 'Review' --code 'api.py'"
+        ]
+      }
+    }
+  },
+  "peerDependencies": {
+    "@google/gemini-cli": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

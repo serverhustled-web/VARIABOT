@@ -1,0 +1,9 @@
+# Ignore Node.js dependency directory
+node_modules/
+
+# Ignore build output
+dist/
+
+# Ignore temporary files
+*.log
+*.sm
